@@ -121,11 +121,8 @@ func _on_stage_idol_entered(idol: IdolPlayer, stage: IdolStage) -> void:
 		return
 	if _has_dropped_baton(idol):
 		return
-	var menu := _menu(idol.team_id)
-	if menu == null or menu.active:
-		return
-	idol.set_movement_locked(true)
-	menu.open_menu(defending_team.owned_clubs)
+	var selected_club: FanClubData = defending_team.owned_clubs.pick_random()
+	_on_capture_confirmed(idol.team_id, selected_club)
 
 
 func _has_dropped_baton(idol: IdolPlayer) -> bool:
