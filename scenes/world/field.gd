@@ -49,6 +49,7 @@ func _draw() -> void:
 func _build_walls() -> void:
 	var body := StaticBody2D.new()
 	body.name = "Walls"
+	body.collision_layer = 1
 	var half := size / 2.0
 	var t := WALL_THICKNESS
 	var margin := maxf(0.0, movement_margin)
