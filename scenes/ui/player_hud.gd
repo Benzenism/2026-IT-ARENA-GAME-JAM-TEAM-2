@@ -8,8 +8,16 @@ extends Control
 const PANEL_SIZE := Vector2(830, 230)
 const CHIP_SIZE := 46.0
 const CHIP_STEP := 59.0 # 54 슬롯 + 5 간격 (아이콘 46은 슬롯 가운데)
+## 칩 줄이 차지하는 폭 (5칸 기준). 칸이 더 많으면 칩을 줄여서 이 폭 안에 맞춘다.
+const CHIP_ROW_WIDTH := CHIP_SIZE * 5 + (CHIP_STEP - CHIP_SIZE) * 4
+const CHIP_TIGHT_GAP := 8.0
 ## 초상화(+뒤 오라)를 디자인 위치보다 화면 가운데 쪽으로 옮기는 양 (디자인 px)
 const PORTRAIT_INSET := 12.0
+## 초상화를 패널(230) 위로 올리는 양. 초상화 아래는 화면 끝(패널 바닥)에 붙어 있고
+## 높이 = 230 + 이 값. 일러스트 파일(480×777)은 이 비율(210×340)로 잘라 둔 것 —
+## 값을 바꾸면 일러스트도 같은 비율로 다시 잘라야 늘어나 보이지 않음.
+const PORTRAIT_RAISE := 110.0
+const PORTRAIT_WIDTH := 210.0
 const TEX := {
 	1: {
 		"portrait": preload("res://sprites/ui/hud/portrait_p1.png"),
@@ -38,14 +46,20 @@ const SPARKLE_8 := preload("res://sprites/ui/hud/sparkle_8.svg")
 		team_id = value
 		if is_inside_tree():
 			_build()
-## 비워두면 P1 = Uli, P2 = Hana
+## 비워두면 P1 = Uri, P2 = Hana
 @export var player_name: String = "":
 	set(value):
 		player_name = value
 		if _name_label:
 			_name_label.text = _display_name()
-## 팬클럽 칩 슬롯 수 (게임 전체 팬클럽 수)
-@export var total_clubs: int = 5
+## 팬클럽 칩 슬롯 수 (게임 전체 팬클럽 수). 게임 중에는 HudOverlay가
+## 두 팀이 가진 팬클럽 수의 합으로 맞춰 준다.
+@export var total_clubs: int = 5:
+	set(value):
+		if value == total_clubs:
+			return
+		total_clubs = value
+		_refresh_chips()
 
 var sudden_death := false
 var _clubs: Array[FanClubData] = []
@@ -90,6 +104,11 @@ func set_player_state(hp: int, _max_hp: int, clubs: Array[FanClubData],
 	_fan_total.text = " / %d" % population_limit
 
 
+## 이 팀이 지금 가진 팬클럽 수
+func owned_club_count() -> int:
+	return _clubs.size()
+
+
 # --- 레이아웃 ----------------------------------------------------------------
 
 func _is_p2() -> bool:
@@ -111,7 +130,7 @@ func _shade() -> Color:
 func _display_name() -> String:
 	if player_name != "":
 		return player_name
-	return "Hana" if _is_p2() else "Uli"
+	return "Hana" if _is_p2() else "Uri"
 
 
 ## P1 기준 x 좌표를 P2에서는 좌우 반전
@@ -140,7 +159,8 @@ func _build() -> void:
 	_panel = Control.new()
 	_panel.name = "Panel"
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.clip_contents = true
+	# 초상화 머리가 패널 위로 나올 수 있게 클립하지 않음 (패널 아래는 어차피 화면 끝)
+	_panel.clip_contents = false
 	_panel.anchor_top = 1.0
 	_panel.anchor_bottom = 1.0
 	_panel.offset_top = -PANEL_SIZE.y
@@ -162,7 +182,8 @@ func _build() -> void:
 
 	# 일러스트는 그려진 방향 그대로 (좌우 반전 없음)
 	_portrait = HudUi.texture_rect(_tex("portrait"),
-		Vector2(_mx(-8 + PORTRAIT_INSET, 210), 0), Vector2(210, 280))
+		Vector2(_mx(-8 + PORTRAIT_INSET, PORTRAIT_WIDTH), -PORTRAIT_RAISE),
+		Vector2(PORTRAIT_WIDTH, PANEL_SIZE.y + PORTRAIT_RAISE))
 	_panel.add_child(_portrait)
 	var hurt_path: String = HURT_PORTRAIT_PATH[2 if p2 else 1]
 	_hurt_texture = load(hurt_path) as Texture2D if ResourceLoader.exists(hurt_path) else null
@@ -191,10 +212,9 @@ func _build() -> void:
 	# 팬클럽 칩 5칸
 	_chip_row = HBoxContainer.new()
 	_chip_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_chip_row.add_theme_constant_override("separation", int(CHIP_STEP - CHIP_SIZE))
 	_chip_row.alignment = BoxContainer.ALIGNMENT_END if p2 else BoxContainer.ALIGNMENT_BEGIN
-	var row_w := CHIP_SIZE * 5 + (CHIP_STEP - CHIP_SIZE) * 4
-	HudUi.set_rect(_chip_row, Vector2(_mx(216, row_w), 176), Vector2(row_w, CHIP_SIZE))
+	HudUi.set_rect(_chip_row, Vector2(_mx(216, CHIP_ROW_WIDTH), 176),
+		Vector2(CHIP_ROW_WIDTH, CHIP_SIZE))
 	_panel.add_child(_chip_row)
 
 	# FANS n / 16 — 칩 옆 자리를 혼자 크게 차지
@@ -293,13 +313,25 @@ func _refresh_chips() -> void:
 	while _chip_row.get_child_count() < slots:
 		var chip := ClubChip.new()
 		chip.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		chip.custom_minimum_size = Vector2(CHIP_SIZE, CHIP_SIZE)
+		chip.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		chip.accent = _accent()
 		_chip_row.add_child(chip)
 	while _chip_row.get_child_count() > slots:
 		var extra := _chip_row.get_child(_chip_row.get_child_count() - 1)
 		_chip_row.remove_child(extra)
 		extra.queue_free()
+	# 5칸까지는 디자인 크기(46), 그보다 많으면 같은 폭 안에 들어가게 줄임
+	var gap := CHIP_STEP - CHIP_SIZE
+	var chip_size := CHIP_SIZE
+	if slots > 5:
+		gap = CHIP_TIGHT_GAP
+		chip_size = floorf((CHIP_ROW_WIDTH - gap * (slots - 1)) / slots)
+	_chip_row.add_theme_constant_override("separation", int(gap))
+	for child in _chip_row.get_children():
+		var c := child as ClubChip
+		c.custom_minimum_size = Vector2(chip_size, chip_size)
+		c.corner_radius = roundi(12.0 * chip_size / CHIP_SIZE)
+		c.queue_redraw()
 	var owned := _clubs.size()
 	var empty := slots - owned
 	for i in range(slots):
