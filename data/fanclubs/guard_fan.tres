@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="FanClubData" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="FanClubData" format=3 uid="uid://c08yv7xu61kcu"]
 
-[ext_resource type="Script" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/OrbitMovement.tscn" id="2_move"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/NoAttack.tscn" id="3_attack"]
-[ext_resource type="Texture2D" path="res://sprites/fans/fan_guard.png" id="4_sprite"]
+[ext_resource type="Texture2D" uid="uid://cbeof4pgaqfpm" path="res://sprites/fans/fan_guard.png" id="4_sprite"]
 
 [resource]
 script = ExtResource("1_data")
@@ -11,10 +11,8 @@ club_id = &"guard"
 display_name = "응원봉부대"
 description = "자기 아이돌 주변을 공전하며 적 탄환을 대신 막습니다."
 sprite_texture = ExtResource("4_sprite")
-sprite_scale = Vector2(0.07974482, 0.07974482)
 hit_flash_duration = 0.25
 max_hp = 2
-hitbox_radius = 30.0
 move_speed = 420.0
 population_cost = 2
 respawn_delay = 8.0

@@ -35,6 +35,8 @@ var charge_timer: Timer
 func _ready() -> void:
 	assert(club != null and club.movement_scene != null and club.attack_scene != null,
 		"Assign a FanClubData with movement and attack scenes before add_child().")
+	assert(club.sprite_texture != null,
+		"Assign a sprite texture to FanClubData before adding a Fan.")
 	hp = club.max_hp
 	var body_collision := $CollisionShape2D as CollisionShape2D
 	var original_shape := body_collision.shape as CircleShape2D
@@ -42,9 +44,7 @@ func _ready() -> void:
 		var instance_shape := original_shape.duplicate() as CircleShape2D
 		instance_shape.radius = maxf(1.0, club.hitbox_radius)
 		body_collision.shape = instance_shape
-	if club.sprite_texture != null:
-		sprite.texture = club.sprite_texture
-		sprite.scale = club.sprite_scale * 1.15
+	sprite.texture = club.sprite_texture
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group("fans")
 	if club.intercepts_projectiles:

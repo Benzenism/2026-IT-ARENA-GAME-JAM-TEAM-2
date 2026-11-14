@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/ForwardAttack.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://ct63llitjees7" path="res://scenes/projectile/normal_bullet.tscn" id="4"]
 [ext_resource type="Texture2D" uid="uid://cj2kg11xx6w8q" path="res://sprites/fans/fan_basic.png" id="5_basic"]
 
 [resource]

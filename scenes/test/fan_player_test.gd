@@ -7,7 +7,6 @@ const DIAGONAL: FanClubData = preload("res://data/fanclubs/diagonal_fan.tres")
 const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
 const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, CAMERA, GUARD]
-const PLACEHOLDER: Texture2D = preload("res://icon.svg")
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
 const MATCH_DURATION := 240.0
 
@@ -66,7 +65,6 @@ func _ready() -> void:
 		team.fan_container = fans
 		team.projectile_spawner = projectiles
 		team.arena_rect = bounds
-		team.fan_spawned.connect(_on_fan_spawned)
 		add_child(team)
 		teams.append(team)
 		team.try_spawn()
@@ -88,27 +86,12 @@ func _randomize_team_clubs() -> Array:
 	return teams_clubs
 
 
-func _on_fan_spawned(fan: Fan) -> void:
-	# Use the existing project icon only when the club has no sprite configured.
-	if fan.sprite.texture == null:
-		fan.sprite.texture = PLACEHOLDER
-		fan.sprite.scale = Vector2(0.36, 0.36)
-		fan.sprite.modulate = Color(1, 0.55, 0.55) if fan.team_id == 1 else Color(0.55, 0.7, 1)
-
-
 func _process(_delta: float) -> void:
 	if Input.is_action_just_pressed("ui_accept"):
 		get_tree().reload_current_scene()
 		return
 	if not ui_connected:
 		_connect_ui()
-	# Give otherwise invisible bullets a temporary marker in this test scene only.
-	for bullet: FanProjectile in projectiles.get_children():
-		var sprite := bullet.get_node("Sprite2D") as Sprite2D
-		if sprite.texture == null:
-			sprite.texture = PLACEHOLDER
-			sprite.scale = Vector2(0.3, 0.3)
-			sprite.modulate = Color(1, 0.55, 0.55) if bullet.team_id == 1 else Color(0.55, 0.7, 1)
 	if not game_over and not sudden_death:
 		match_time_left = maxf(0.0, match_time_left - _delta)
 		if is_zero_approx(match_time_left):

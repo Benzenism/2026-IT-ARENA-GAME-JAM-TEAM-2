@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/fan/fan.gd" id="1"]
 
 [sub_resource type="CircleShape2D" id="BodyShape"]
-radius = 14.0
+radius = 40.0
 
 [node name="Fan" type="CharacterBody2D"]
 collision_layer = 2

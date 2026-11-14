@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="FanClubData" load_steps=6 format=3]
+[gd_resource type="Resource" script_class="FanClubData" format=3 uid="uid://boktp32ou6s1d"]
 
-[ext_resource type="Script" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2_move"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/DiagonalAttack.tscn" id="3_attack"]
-[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4_bullet"]
-[ext_resource type="Texture2D" path="res://sprites/fans/fan_diagonal.png" id="5_sprite"]
+[ext_resource type="PackedScene" uid="uid://ct63llitjees7" path="res://scenes/projectile/normal_bullet.tscn" id="4_bullet"]
+[ext_resource type="Texture2D" uid="uid://cb4d3sdscpfsa" path="res://sprites/fans/fan_diagonal.png" id="5_sprite"]
 
 [resource]
 script = ExtResource("1_data")
@@ -12,7 +12,6 @@ club_id = &"diagonal"
 display_name = "사방팬"
 description = "전방으로 이동하며 2초마다 네 대각선으로 탄환 네 발을 발사합니다."
 sprite_texture = ExtResource("5_sprite")
-sprite_scale = Vector2(0.07917656, 0.08025682)
 population_cost = 2
 attack_interval = 2.0
 projectile_speed = 200.0

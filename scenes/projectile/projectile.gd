@@ -14,6 +14,8 @@ var spawn_sequence: int = 0
 
 
 func _ready() -> void:
+	assert($Sprite2D.texture != null,
+		"Assign a texture to the projectile Sprite2D before adding it to the game.")
 	add_to_group("projectiles")
 	direction = direction.normalized()
 	body_entered.connect(_on_body_entered)
