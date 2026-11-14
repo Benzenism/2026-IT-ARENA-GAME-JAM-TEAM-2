@@ -6,6 +6,8 @@ signal despawned(population_cost: int)
 signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
 		team_id: int, bounds: Rect2)
 
+const CHARGE_DURATION := 0.5
+
 @export var club: FanClubData
 @export var team_id: int = 1
 var enemy_player: CharacterBody2D
@@ -15,9 +17,12 @@ var movement: FanMovement
 var attack: FanAttack
 var is_despawning: bool = false
 var has_died: bool = false
+var is_charging: bool = false
+var charge_base_color := Color.WHITE
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var sprite: Sprite2D = $Sprite2D
+var charge_timer: Timer
 
 
 func _ready() -> void:
@@ -34,14 +39,25 @@ func _ready() -> void:
 	assert(movement != null and attack != null, "Invalid fan behavior scene.")
 	add_child(movement)
 	add_child(attack)
+	charge_timer = Timer.new()
+	charge_timer.one_shot = true
+	charge_timer.wait_time = CHARGE_DURATION
+	charge_timer.timeout.connect(_on_charge_finished)
+	add_child(charge_timer)
 	for ability_scene in club.ability_scenes:
 		var ability := ability_scene.instantiate() as FanAbility
 		assert(ability != null)
 		add_child(ability)
 		ability.setup(self)
-	attack_timer.wait_time = maxf(0.05, club.attack_interval)
+	attack_timer.wait_time = maxf(0.05, club.attack_interval - CHARGE_DURATION)
+	attack_timer.one_shot = true
 	attack_timer.timeout.connect(_on_attack_timeout)
 	attack_timer.start()
+
+func _process(_delta: float) -> void:
+	if is_charging:
+		var progress := 1.0 - (charge_timer.time_left / CHARGE_DURATION)
+		sprite.modulate = charge_base_color.lerp(Color.WHITE, progress)
 
 
 func _physics_process(_delta: float) -> void:
@@ -67,8 +83,20 @@ func is_combat_active() -> bool:
 
 
 func _on_attack_timeout() -> void:
-	if is_combat_active():
-		attack.fire(self)
+	if not is_combat_active():
+		return
+	is_charging = true
+	charge_base_color = sprite.modulate
+	charge_timer.start()
+
+
+func _on_charge_finished() -> void:
+	if not is_combat_active():
+		return
+	is_charging = false
+	sprite.modulate = charge_base_color
+	attack.fire(self)
+	attack_timer.start()
 
 
 func shoot(direction: Vector2) -> void:
@@ -109,5 +137,6 @@ func despawn() -> void:
 		return
 	is_despawning = true
 	attack_timer.stop()
+	charge_timer.stop()
 	despawned.emit(club.population_cost)
 	queue_free()

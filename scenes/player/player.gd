@@ -6,7 +6,7 @@ extends CharacterBody2D
 @export var speed: float = 300.0
 @export var color: Color = Color.WHITE
 @export var team_id: int = 1
-@export var max_hp: int = 5
+@export var max_hp: int = 3
 
 signal health_changed(current_hp: int, maximum_hp: int)
 signal respawned
@@ -19,6 +19,7 @@ var invulnerability: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group("idols")
 	_sprite.modulate = color
 	hp = max_hp
 	spawn_position = global_position
