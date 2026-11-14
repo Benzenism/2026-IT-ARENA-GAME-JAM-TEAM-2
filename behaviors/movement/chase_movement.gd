@@ -2,8 +2,8 @@ extends FanMovement
 
 @export var stopping_distance: float = 200.0
 @export var resume_distance: float = 240.0
-@export var max_chase_distance: float = 600.0
-@export var reacquire_distance: float = 550.0
+@export var max_chase_distance: float = 1000.0
+@export var reacquire_distance: float = 900.0
 @export var separation_radius: float = 112.0
 @export var separation_strength: float = 1.5
 

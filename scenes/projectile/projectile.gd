@@ -1,6 +1,8 @@
 class_name FanProjectile
 extends Area2D
 
+const IMPACT_EFFECT = preload("res://scenes/projectile/projectile_impact.gd")
+
 @export var speed: float = 260.0
 @export var damage: int = 1
 @export var lifetime: float = 4.8
@@ -14,8 +16,6 @@ var spawn_sequence: int = 0
 
 
 func _ready() -> void:
-	assert($Sprite2D.texture != null,
-		"Assign a texture to the projectile Sprite2D before adding it to the game.")
 	add_to_group("projectiles")
 	direction = direction.normalized()
 	body_entered.connect(_on_body_entered)
@@ -36,6 +36,7 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if body.is_in_group("stage_safe_zones"):
 		consumed = true
+		_show_impact()
 		queue_free()
 		return
 	if not body.has_method("take_damage") or body.get("team_id") == team_id:
@@ -50,8 +51,19 @@ func _on_body_entered(body: Node2D) -> void:
 		if guard != null:
 			body = guard
 	consumed = true
+	_show_impact()
 	body.take_damage(damage)
 	queue_free()
+
+
+func _show_impact() -> void:
+	var container := get_parent() as Node2D
+	if not is_instance_valid(container):
+		return
+	var effect := IMPACT_EFFECT.new()
+	effect.team_id = team_id
+	effect.position = container.to_local(global_position)
+	container.add_child.call_deferred(effect)
 
 
 func _overlapping_guard(idol: Node2D) -> Fan:
