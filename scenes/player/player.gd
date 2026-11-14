@@ -5,7 +5,7 @@ extends CharacterBody2D
 
 @export var input_prefix: String = "p1"
 @export var speed: float = 300.0
-@export var color: Color = Color.WHITE
+@export var player_texture: Texture2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
 
@@ -35,7 +35,8 @@ var slow_multiplier: float = 1.0
 
 func _ready() -> void:
 	add_to_group("idols")
-	_sprite.modulate = color
+	assert(player_texture != null, "Assign a player texture before adding an IdolPlayer.")
+	_sprite.texture = player_texture
 	hp = max_hp
 	spawn_position = global_position
 	respawn_timer = Timer.new()
@@ -51,7 +52,7 @@ func _physics_process(delta: float) -> void:
 		slow_remaining = maxf(0.0, slow_remaining - delta)
 		if slow_remaining == 0.0:
 			slow_multiplier = 1.0
-	var display_color := color.lerp(Color.WHITE, 0.45) if slow_remaining > 0.0 else color
+	var display_color := Color.WHITE
 	if invulnerability > 0.0 and int(invulnerability * 10.0) % 2 == 0:
 		display_color.a *= 0.4
 	_sprite.modulate = display_color
