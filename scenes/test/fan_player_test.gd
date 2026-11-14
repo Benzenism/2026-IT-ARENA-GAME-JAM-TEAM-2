@@ -241,7 +241,6 @@ func _update_ui() -> void:
 				hud.set_match_state(match_time_left, sudden_death, game_over, winner_team)
 				hud.set_player_state(player.hp, player.max_hp, team.owned_clubs,
 					team.used_population, 16)
-				hud.set_idol_state(player, ALL_CLUBS.size())
 
 
 func _update_match_timer() -> void:

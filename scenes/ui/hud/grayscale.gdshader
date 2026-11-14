@@ -1,5 +1,5 @@
 shader_type canvas_item;
-// 멘탈 다운 상태 초상화용 흑백 처리
+// HP 0(리스폰 대기) 동안 초상화를 흑백으로
 
 void fragment() {
 	vec4 c = texture(TEXTURE, UV) * COLOR;
