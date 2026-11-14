@@ -6,7 +6,7 @@
 radius = 110.0
 
 [sub_resource type="CircleShape2D" id="SafeZoneShape"]
-radius = 320.0
+radius = 250.0
 
 [node name="Stage" type="Area2D" unique_id=631044211]
 collision_layer = 0

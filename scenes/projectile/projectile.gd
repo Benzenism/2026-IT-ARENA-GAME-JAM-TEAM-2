@@ -26,9 +26,26 @@ func _physics_process(delta: float) -> void:
 		return
 	age += delta
 	global_position += direction * speed * delta
+	if _inside_stage_safe_zone():
+		consumed = true
+		queue_free()
+		return
 	if age >= lifetime or not arena_rect.grow(28).has_point(global_position):
 		consumed = true
 		queue_free()
+
+
+func _inside_stage_safe_zone() -> bool:
+	var collision := $CollisionShape2D as CollisionShape2D
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = collision.shape
+	query.transform = collision.global_transform
+	query.collision_mask = 4
+	query.collide_with_bodies = true
+	for result in get_world_2d().direct_space_state.intersect_shape(query, 8):
+		if result.collider.is_in_group("stage_safe_zones"):
+			return true
+	return false
 
 
 func _on_body_entered(body: Node2D) -> void:

@@ -9,7 +9,7 @@ extends Control
 @onready var population_label: Label = %Population
 @onready var status_label: Label = %Status
 @onready var club_icons: Array[TextureRect] = [
-	%ClubIcon1, %ClubIcon2, %ClubIcon3
+	%ClubIcon1, %ClubIcon2, %ClubIcon3, %ClubIcon4, %ClubIcon5
 ]
 
 

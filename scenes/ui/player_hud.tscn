@@ -92,6 +92,26 @@ offset_bottom = 164.0
 expand_mode = 1
 stretch_mode = 5
 
+[node name="ClubIcon4" type="TextureRect" parent="." unique_id=134668139]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 164.0
+offset_top = 124.0
+offset_right = 204.0
+offset_bottom = 164.0
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ClubIcon5" type="TextureRect" parent="." unique_id=134668140]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 212.0
+offset_top = 124.0
+offset_right = 252.0
+offset_bottom = 164.0
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Status" type="Label" parent="." unique_id=1374077979]
 unique_name_in_owner = true
 layout_mode = 1
