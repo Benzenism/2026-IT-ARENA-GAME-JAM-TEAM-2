@@ -6,8 +6,10 @@ extends Resource
 @export var club_id: StringName
 @export var display_name: String
 @export_multiline var description: String
-@export var movement_label: String
-@export var attack_label: String
+
+@export_group("Visuals")
+@export var sprite_texture: Texture2D
+@export var sprite_scale: Vector2 = Vector2.ONE
 
 @export_group("Stats")
 @export_range(1, 100) var max_hp: int = 3
@@ -20,8 +22,3 @@ extends Resource
 @export var attack_scene: PackedScene
 @export var projectile_scene: PackedScene
 @export var ability_scenes: Array[PackedScene] = []
-
-@export_group("Prototype Appearance")
-@export var accent: Color = Color("7ce8c0")
-@export_range(0.0, 1.0) var eye_slant: float = 0.0
-@export_range(3, 6) var crest_points: int = 3

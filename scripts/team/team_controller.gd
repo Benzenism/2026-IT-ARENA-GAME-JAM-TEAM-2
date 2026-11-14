@@ -14,10 +14,10 @@ const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
 var used_population: int = 0
 var next_spawn_index: int = 0
 var spawn_count: int = 0
-var enemy_player: PrototypePlayer
+var enemy_player: CharacterBody2D
 var fan_container: Node2D
 var projectile_spawner: ProjectileSpawner
-var arena_rect := Rect2(48, 230, 1344, 480)
+var arena_rect := Rect2(0, 0, 1280, 720)
 var spawn_timer: Timer
 
 

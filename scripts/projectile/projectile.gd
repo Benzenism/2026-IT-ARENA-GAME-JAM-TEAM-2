@@ -7,7 +7,7 @@ extends Area2D
 
 var team_id: int = 1
 var direction := Vector2.RIGHT
-var arena_rect := Rect2(48, 230, 1344, 480)
+var arena_rect := Rect2(0, 0, 1280, 720)
 var consumed: bool = false
 var age: float = 0.0
 
@@ -16,7 +16,6 @@ func _ready() -> void:
 	add_to_group("projectiles")
 	direction = direction.normalized()
 	body_entered.connect(_on_body_entered)
-	queue_redraw()
 
 
 func _physics_process(delta: float) -> void:
@@ -37,11 +36,3 @@ func _on_body_entered(body: Node2D) -> void:
 	consumed = true
 	body.take_damage(damage)
 	queue_free()
-
-
-func _draw() -> void:
-	var color := Color("83dfff") if team_id == 1 else Color("ff98bf")
-	draw_circle(Vector2.ZERO, 9, Color(color, 0.09))
-	draw_line(-direction * 12, Vector2.ZERO, Color(color, 0.3), 3, true)
-	draw_circle(Vector2.ZERO, 4, color)
-	draw_circle(-direction, 1.7, Color.WHITE)
