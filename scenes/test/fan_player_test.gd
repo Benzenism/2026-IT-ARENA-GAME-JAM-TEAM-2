@@ -9,7 +9,7 @@ const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
 const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, VERTICAL, CAMERA, GUARD]
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
-const MATCH_DURATION := 240.0
+const MATCH_DURATION := 120.0
 
 var teams: Array[TeamController] = []
 var players: Array[IdolPlayer] = []
