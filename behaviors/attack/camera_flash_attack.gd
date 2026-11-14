@@ -1,7 +1,7 @@
 extends FanAttack
 ## A warned, non-damaging circular flash that slows opposing idols.
 
-@export var radius: float = 80.0
+@export var radius: float = 200.0
 @export_range(0.0, 1.0) var slow_multiplier: float = 0.5
 @export var slow_duration: float = 1.0
 @export_flags_2d_physics var target_mask: int = 1

@@ -14,11 +14,13 @@ const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
 var used_population: int = 0
 var next_spawn_index: int = 0
 var spawn_count: int = 0
+var ally_player: CharacterBody2D
 var enemy_player: CharacterBody2D
 var fan_container: Node2D
 var projectile_spawner: ProjectileSpawner
 var arena_rect := Rect2(0, 0, 1280, 720)
 var spawn_timer: Timer
+var respawn_cooldowns: Dictionary = {}
 
 
 func _ready() -> void:
@@ -30,6 +32,15 @@ func _ready() -> void:
 	spawn_timer.start()
 
 
+func _physics_process(delta: float) -> void:
+	for club in respawn_cooldowns.keys():
+		var remaining: float = respawn_cooldowns[club] - delta
+		if remaining <= 0.0:
+			respawn_cooldowns.erase(club)
+		else:
+			respawn_cooldowns[club] = remaining
+
+
 func try_spawn() -> Fan:
 	var count := owned_clubs.size()
 	if count == 0:
@@ -38,6 +49,10 @@ func try_spawn() -> Fan:
 		var index := (next_spawn_index + offset) % count
 		var club := owned_clubs[index]
 		if club == null or used_population + club.population_cost > population_limit:
+			continue
+		if respawn_cooldowns.has(club):
+			continue
+		if club.requires_ally_player and not _has_ally_player():
 			continue
 		var fan := spawn_fan(club)
 		if fan != null:
@@ -52,9 +67,14 @@ func spawn_fan(club: FanClubData) -> Fan:
 		return null
 	if used_population + club.population_cost > population_limit:
 		return null
+	if respawn_cooldowns.has(club):
+		return null
+	if club.requires_ally_player and not _has_ally_player():
+		return null
 	var fan := FAN_SCENE.instantiate() as Fan
 	fan.club = club
 	fan.team_id = team_id
+	fan.ally_player = ally_player
 	fan.enemy_player = enemy_player
 	fan.arena_rect = arena_rect
 	# Spread out the first shots so simultaneous spawns do not form an unavoidable wall.
@@ -64,6 +84,7 @@ func spawn_fan(club: FanClubData) -> Fan:
 	var spawn_y := arena_rect.position.y + 68 + lane * (arena_rect.size.y - 136) / 4.0
 	fan.position = fan_container.to_local(Vector2(spawn_x, spawn_y))
 	fan.despawned.connect(_on_fan_despawned)
+	fan.died.connect(_on_fan_died.bind(club))
 	fan.shoot_requested.connect(projectile_spawner.request_shot)
 	# Reserve the cost before entering the tree, where callbacks may execute.
 	used_population += club.population_cost
@@ -72,6 +93,16 @@ func spawn_fan(club: FanClubData) -> Fan:
 	population_changed.emit()
 	fan_spawned.emit(fan)
 	return fan
+
+
+func _has_ally_player() -> bool:
+	return is_instance_valid(ally_player) and ally_player.is_inside_tree() \
+		and not ally_player.is_queued_for_deletion()
+
+
+func _on_fan_died(club: FanClubData) -> void:
+	if club.respawn_delay > 0.0:
+		respawn_cooldowns[club] = club.respawn_delay
 
 
 func _on_fan_despawned(cost: int) -> void:

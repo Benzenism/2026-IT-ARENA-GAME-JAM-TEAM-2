@@ -6,6 +6,10 @@ extends Node
 var prepared_directions: Array[Vector2] = []
 
 
+func is_enabled() -> bool:
+	return true
+
+
 func prepare(_fan: Fan) -> void:
 	prepared_directions.clear()
 

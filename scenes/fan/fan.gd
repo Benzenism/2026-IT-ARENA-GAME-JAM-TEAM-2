@@ -6,9 +6,14 @@ signal despawned(population_cost: int)
 signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
 		team_id: int, bounds: Rect2, lifetime: float, speed: float)
 
+const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
+	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
+	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
+
 @export var club: FanClubData
 @export var team_id: int = 1
 @export var show_trajectory_guides: bool = false
+@export var ally_player: CharacterBody2D
 var enemy_player: CharacterBody2D
 var arena_rect := Rect2(0, 0, 1280, 720)
 var hp: int
@@ -19,6 +24,8 @@ var has_died: bool = false
 var is_charging: bool = false
 var charge_base_color := Color.WHITE
 var first_attack_offset: float = 0.0
+var hit_flash_tween: Tween
+var hit_flash_base_color := Color.WHITE
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -29,11 +36,19 @@ func _ready() -> void:
 	assert(club != null and club.movement_scene != null and club.attack_scene != null,
 		"Assign a FanClubData with movement and attack scenes before add_child().")
 	hp = club.max_hp
+	var body_collision := $CollisionShape2D as CollisionShape2D
+	var original_shape := body_collision.shape as CircleShape2D
+	if original_shape != null and not is_equal_approx(original_shape.radius, club.hitbox_radius):
+		var instance_shape := original_shape.duplicate() as CircleShape2D
+		instance_shape.radius = maxf(1.0, club.hitbox_radius)
+		body_collision.shape = instance_shape
 	if club.sprite_texture != null:
 		sprite.texture = club.sprite_texture
 		sprite.scale = club.sprite_scale * 1.15
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group("fans")
+	if club.intercepts_projectiles:
+		add_to_group("projectile_guards")
 	movement = club.movement_scene.instantiate() as FanMovement
 	attack = club.attack_scene.instantiate() as FanAttack
 	assert(movement != null and attack != null, "Invalid fan behavior scene.")
@@ -53,7 +68,8 @@ func _ready() -> void:
 	attack_timer.wait_time = maxf(0.05, club.attack_interval - charge_timer.wait_time)
 	attack_timer.one_shot = true
 	attack_timer.timeout.connect(_on_attack_timeout)
-	attack_timer.start(attack_timer.wait_time + maxf(0.0, first_attack_offset))
+	if attack.is_enabled():
+		attack_timer.start(attack_timer.wait_time + maxf(0.0, first_attack_offset))
 
 func _process(_delta: float) -> void:
 	if is_charging:
@@ -86,11 +102,16 @@ func _draw() -> void:
 				draw_line(origin, origin + aim * length, line_color, 2.5, true)
 		attack.draw_telegraph(self)
 	attack.draw_effect(self)
-	var health_color := Color("f16f8a") if team_id == 1 else Color("69a9ff")
+	if is_despawning:
+		return
+	var health_color := Color("e845e0") if team_id == 1 else Color("0c56f6")
 	for i in range(club.max_hp):
-		var offset := (i - (club.max_hp - 1) * 0.5) * 6.0
-		draw_circle(Vector2(offset, 30), 1.8,
-			health_color if i < hp else Color("35415b"))
+		var offset := Vector2((i - (club.max_hp - 1) * 0.5) * 21.0, 68.0)
+		var points := PackedVector2Array()
+		for point in HEART_POINTS:
+			points.append(point + offset)
+		draw_colored_polygon(points, health_color if i < hp else Color("717682"))
+		draw_polyline(points, Color("1b2029"), 2.0, true)
 
 
 func _telegraph_length(origin: Vector2, direction: Vector2) -> float:
@@ -121,7 +142,7 @@ func is_combat_active() -> bool:
 
 
 func _on_attack_timeout() -> void:
-	if not is_combat_active():
+	if not is_combat_active() or not attack.is_enabled():
 		return
 	attack.prepare(self)
 	is_charging = true
@@ -152,9 +173,23 @@ func take_damage(amount: int) -> void:
 	if not is_combat_active() or amount <= 0:
 		return
 	hp = maxi(0, hp - amount)
+	_show_hit_flash()
 	queue_redraw()
 	if hp == 0:
 		die()
+
+
+func _show_hit_flash() -> void:
+	if club.hit_flash_duration <= 0.0:
+		return
+	if hit_flash_tween != null and hit_flash_tween.is_running():
+		hit_flash_tween.kill()
+	else:
+		hit_flash_base_color = sprite.modulate
+	sprite.modulate = Color(hit_flash_base_color.r, hit_flash_base_color.g * 0.15,
+		hit_flash_base_color.b * 0.15, hit_flash_base_color.a)
+	hit_flash_tween = create_tween()
+	hit_flash_tween.tween_property(sprite, "modulate", hit_flash_base_color, club.hit_flash_duration)
 
 
 func heal(amount: int) -> void:
@@ -182,4 +217,14 @@ func despawn() -> void:
 	attack_timer.stop()
 	charge_timer.stop()
 	despawned.emit(club.population_cost)
-	queue_free()
+	if has_died and club.hit_flash_duration > 0.0:
+		if hit_flash_tween != null and hit_flash_tween.is_running():
+			hit_flash_tween.kill()
+		set_deferred("collision_layer", 0)
+		var faded_color := sprite.modulate
+		faded_color.a = 0.0
+		var death_tween := create_tween()
+		death_tween.tween_property(sprite, "modulate", faded_color, club.hit_flash_duration)
+		death_tween.tween_callback(queue_free)
+	else:
+		queue_free()
