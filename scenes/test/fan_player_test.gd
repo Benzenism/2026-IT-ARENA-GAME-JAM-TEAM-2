@@ -201,6 +201,8 @@ func _complete_capture(idol: IdolPlayer) -> void:
 	for fan: Fan in get_tree().get_nodes_in_group("fans"):
 		if fan.team_id == source_team_id and fan.club == club:
 			fan.change_team(target_team_id, _player(source_team_id))
+	# 팬 쟁탈 컷인 (재생되는 약 1.4초 동안 게임 일시정지)
+	get_tree().call_group("steal_cutin", "play_steal", target_team_id)
 	if sudden_death or source_team.owned_clubs.is_empty():
 		_finish_game(target_team_id)
 

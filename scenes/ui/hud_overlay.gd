@@ -40,7 +40,6 @@ var _outline: TextureRect
 var _time_label: Label
 var _time_ribbon: Control
 var _sudden_label: Label
-var _sudden_sub: Label
 var _sudden_ribbon: Control
 
 
@@ -56,16 +55,10 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var sudden := false
-	var total_clubs := 0
 	for hud in _huds:
 		sudden = sudden or hud.sudden_death
-		total_clubs += hud.owned_club_count()
 	if sudden != _sudden:
 		_set_sudden(sudden)
-	# 팬클럽은 두 팀이 나눠 가지므로, 칩 슬롯 수 = 두 팀 보유 수의 합 (게임의 팬클럽 수를 따라감)
-	if total_clubs > 0:
-		for hud in _huds:
-			hud.total_clubs = total_clubs
 
 
 func _layout() -> void:
@@ -99,6 +92,12 @@ func _build() -> void:
 		var cap := HudUi.texture_rect(tex, Vector2.ZERO, Vector2(25, 25))
 		_anchor(cap, 0.5, 1.0, 0.5, 1.0, Rect2(-12.5, -146, 25, 25))
 		_canvas.add_child(cap)
+
+	# 팬 쟁탈 컷인 (맨 위에 그려짐, 평소엔 숨김)
+	var cutin := StealCutIn.new()
+	cutin.name = "StealCutIn"
+	_anchor(cutin, 0, 0, 1, 1, Rect2())
+	_canvas.add_child(cutin)
 
 	_set_sudden(false)
 
@@ -186,15 +185,12 @@ func _make_clock() -> Control:
 	clock.add_child(_time_ribbon)
 
 	# 서든데스
-	_sudden_label = HudUi.label("서든데스", 38, Color.WHITE, Color("ff3b5c"), Vector2(0, 3))
+	# 설명 문구 없이 제목만 — 카운트다운 숫자와 같은 자리(탭 가운데)에
+	_sudden_label = HudUi.label("서든데스", 44, Color.WHITE, Color("ff3b5c"), Vector2(0, 3))
 	_sudden_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_sudden_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	HudUi.set_rect(_sudden_label, Vector2(760, 120), Vector2(400, 56))
+	HudUi.set_rect(_sudden_label, Vector2(760, 122), Vector2(400, 74))
 	clock.add_child(_sudden_label)
-	_sudden_sub = HudUi.label("먼저 1개 운반하면 승리", 13, Color(1, 1, 1, 0.8))
-	_sudden_sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	HudUi.set_rect(_sudden_sub, Vector2(760, 170), Vector2(400, 22))
-	clock.add_child(_sudden_sub)
 	_sudden_ribbon = _ribbon("SUDDEN DEATH", Color("ff3b5c"), Color.WHITE)
 	clock.add_child(_sudden_ribbon)
 	return clock
@@ -219,5 +215,4 @@ func _set_sudden(sudden: bool) -> void:
 	_time_label.visible = not sudden
 	_time_ribbon.visible = not sudden
 	_sudden_label.visible = sudden
-	_sudden_sub.visible = sudden
 	_sudden_ribbon.visible = sudden
