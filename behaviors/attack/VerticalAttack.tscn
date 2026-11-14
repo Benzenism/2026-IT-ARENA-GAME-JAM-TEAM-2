@@ -4,3 +4,5 @@
 
 [node name="VerticalAttack" type="Node"]
 script = ExtResource("1")
+burst_count = 2
+burst_interval = 0.18

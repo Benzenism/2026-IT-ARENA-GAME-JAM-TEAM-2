@@ -84,7 +84,7 @@ func _physics_process(_delta: float) -> void:
 	if is_despawning:
 		return
 	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * _delta)
-	var movement_velocity := Vector2.ZERO if is_charging \
+	var movement_velocity := Vector2.ZERO if is_charging or attack.is_bursting() \
 			else movement.get_direction(self).limit_length(1.0) * club.move_speed
 	velocity = movement_velocity + knockback_velocity
 	move_and_slide()
@@ -144,6 +144,7 @@ func apply_knockback(direction: Vector2, distance: float) -> void:
 
 
 func change_team(new_team_id: int, new_enemy_player: CharacterBody2D) -> void:
+	attack.cancel_burst()
 	team_id = new_team_id
 	enemy_player = new_enemy_player
 	queue_redraw()
@@ -161,6 +162,7 @@ func is_combat_active() -> bool:
 func _on_attack_timeout() -> void:
 	if not is_combat_active() or not attack.is_enabled():
 		return
+	attack.cancel_burst()
 	attack.prepare(self)
 	is_charging = true
 	charge_base_color = hit_flash_base_color if hit_flash_tween != null and hit_flash_tween.is_running() else sprite.modulate
@@ -234,6 +236,7 @@ func despawn() -> void:
 	is_despawning = true
 	attack_timer.stop()
 	charge_timer.stop()
+	attack.cancel_burst()
 	is_charging = false
 	queue_redraw()
 	despawned.emit(club.population_cost)

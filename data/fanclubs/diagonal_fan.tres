@@ -3,17 +3,17 @@
 [ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2_move"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/DiagonalAttack.tscn" id="3_attack"]
-[ext_resource type="PackedScene" uid="uid://ct63llitjees7" path="res://scenes/projectile/normal_bullet.tscn" id="4_bullet"]
+[ext_resource type="PackedScene" path="res://scenes/projectile/sine_bullet.tscn" id="4_bullet"]
 [ext_resource type="Texture2D" uid="uid://cb4d3sdscpfsa" path="res://sprites/fans/fan_diagonal.png" id="5_sprite"]
 
 [resource]
 script = ExtResource("1_data")
 club_id = &"diagonal"
 display_name = "사방팬"
-description = "전방으로 이동하며 2초마다 네 대각선으로 탄환 네 발을 발사합니다."
+description = "전방으로 이동하며 3.6초마다 네 대각선 방향으로 빠르게 진동하는 사인파 탄환을 한 발씩 발사합니다."
 sprite_texture = ExtResource("5_sprite")
 population_cost = 2
-attack_interval = 2.0
+attack_interval = 3.6
 projectile_speed = 200.0
 projectile_lifetime = 6.0
 movement_scene = ExtResource("2_move")

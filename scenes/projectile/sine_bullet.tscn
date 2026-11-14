@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="1_bullet"]
+
+[node name="SineBullet" instance=ExtResource("1_bullet")]
+wave_amplitude = 10.0
+wave_frequency = 3.2

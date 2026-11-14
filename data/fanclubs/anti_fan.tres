@@ -10,13 +10,12 @@
 script = ExtResource("1")
 club_id = &"anti"
 display_name = "안티팬"
-description = "상대 플레이어를 쫓아가며 현재 위치를 조준합니다.
-발사된 탄환은 직선으로 날아가므로 피할 수 있습니다."
+description = "상대 플레이어를 쫓아가며 예고한 조준 방향을 중심으로 좁게 퍼지는 탄환 3발을 발사합니다."
 sprite_texture = ExtResource("5_anti")
 max_hp = 4
 move_speed = 82.0
 population_cost = 2
-attack_interval = 2.8
+attack_interval = 4.2
 projectile_speed = 210.0
 projectile_lifetime = 6.6
 movement_scene = ExtResource("2")
