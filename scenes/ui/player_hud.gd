@@ -3,7 +3,6 @@ extends Control
 
 @export var team_id: int = 1
 
-@onready var timer_label: Label = %Timer
 @onready var hearts_label: Label = %Hearts
 @onready var clubs_label: Label = %Clubs
 @onready var population_label: Label = %Population
@@ -17,13 +16,8 @@ func _ready() -> void:
 	add_to_group("player_huds")
 
 
-func set_match_state(time_left: float, sudden_death: bool, game_over: bool,
+func set_match_state(_time_left: float, sudden_death: bool, game_over: bool,
 		winner_team: int) -> void:
-	if sudden_death:
-		timer_label.text = "SUDDEN DEATH"
-	else:
-		var seconds := maxi(0, ceili(time_left))
-		timer_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
 	if game_over:
 		status_label.text = "YOU WIN" if winner_team == team_id else "YOU LOSE"
 	elif sudden_death:

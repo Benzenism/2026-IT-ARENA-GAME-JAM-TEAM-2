@@ -231,6 +231,7 @@ func _on_player_health_changed(_current_hp: int, _maximum_hp: int,
 
 
 func _update_ui() -> void:
+	_update_match_timer()
 	for team_id in [1, 2]:
 		var team := _team(team_id)
 		team._sync_population()
@@ -240,6 +241,17 @@ func _update_ui() -> void:
 				hud.set_match_state(match_time_left, sudden_death, game_over, winner_team)
 				hud.set_player_state(player.hp, player.max_hp, team.owned_clubs,
 					team.used_population, 16)
+
+
+func _update_match_timer() -> void:
+	var timer_label := get_tree().get_first_node_in_group("match_timer") as Label
+	if timer_label == null:
+		return
+	if sudden_death:
+		timer_label.text = "SUDDEN DEATH"
+	else:
+		var seconds := maxi(0, ceili(match_time_left))
+		timer_label.text = "%02d:%02d" % [seconds / 60, seconds % 60]
 
 
 func _remove_dropped_baton(baton: CaptureBaton) -> void:
