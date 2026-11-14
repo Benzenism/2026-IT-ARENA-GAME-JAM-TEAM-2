@@ -217,16 +217,16 @@ func _build() -> void:
 		Vector2(CHIP_ROW_WIDTH, CHIP_SIZE))
 	_panel.add_child(_chip_row)
 
-	# FANS n / 16 — 칩 옆 자리를 혼자 크게 차지
+	# FANS n / 24 — 칩 옆 자리를 혼자 크게 차지
 	var fans_row := HBoxContainer.new()
 	fans_row.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	fans_row.add_theme_constant_override("separation", 0)
 	fans_row.alignment = BoxContainer.ALIGNMENT_END if p2 else BoxContainer.ALIGNMENT_BEGIN
 	HudUi.set_rect(fans_row, Vector2(_mx(512, 240), 180), Vector2(240, 48))
-	# 화면 가운데 쪽에 캡션: P1 = [n / 16][FANS], P2 = [FANS][n / 16]
+	# 화면 가운데 쪽에 캡션: P1 = [n / 24][FANS], P2 = [FANS][n / 24]
 	var fans_caption := HudUi.label("FANS  " if p2 else "  FANS", 15, HudUi.LABEL_DIM)
 	_fan_count = HudUi.label("0", 34, _light())
-	_fan_total = HudUi.label(" / 16", 34)
+	_fan_total = HudUi.label(" / 24", 34)
 	var order := [fans_caption, _fan_count, _fan_total] if p2 \
 		else [_fan_count, _fan_total, fans_caption]
 	for l in order:

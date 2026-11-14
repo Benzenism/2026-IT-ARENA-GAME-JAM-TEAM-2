@@ -1,10 +1,10 @@
-[gd_resource type="Resource" script_class="FanClubData" format=3]
+[gd_resource type="Resource" script_class="FanClubData" format=3 uid="uid://cy0ly1jvkltci"]
 
-[ext_resource type="Script" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
+[ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2_move"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/VerticalAttack.tscn" id="3_attack"]
 [ext_resource type="PackedScene" path="res://scenes/projectile/note_bullet.tscn" id="4_bullet"]
-[ext_resource type="Texture2D" path="res://sprites/fans/fan_vertical.png" id="5_sprite"]
+[ext_resource type="Texture2D" uid="uid://ld66ajeeb7fs" path="res://sprites/fans/fan_vertical.png" id="5_sprite"]
 
 [resource]
 script = ExtResource("1_data")

@@ -7,7 +7,7 @@ signal fan_spawned(fan: Fan)
 const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
 
 @export var team_id: int = 1
-@export var population_limit: int = 16
+@export var population_limit: int = 24
 @export var owned_clubs: Array[FanClubData] = []
 @export var spawn_interval: float = 1.5
 
@@ -100,9 +100,9 @@ func spawn_fan(club: FanClubData) -> Fan:
 	fan.arena_rect = arena_rect
 	# Spread out the first shots so simultaneous spawns do not form an unavoidable wall.
 	fan.first_attack_offset = (spawn_count % 4) * 0.18 + (0.15 if team_id == 2 else 0.0)
-	var spawn_x := arena_rect.position.x + 54 if team_id == 1 else arena_rect.end.x - 54
-	var lane := spawn_count % 5
-	var spawn_y := arena_rect.position.y + 68 + lane * (arena_rect.size.y - 136) / 4.0
+	var spawn_x := arena_rect.position.x + 600 if team_id == 1 else arena_rect.end.x - 600
+	var lane := spawn_count % 8
+	var spawn_y := arena_rect.position.y + 400 + lane * (arena_rect.size.y - 800) / 7.0
 	fan.position = fan_container.to_local(Vector2(spawn_x, spawn_y))
 	fan.despawned.connect(_on_fan_despawned)
 	fan.died.connect(_on_fan_died.bind(club))

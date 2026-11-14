@@ -27,7 +27,7 @@ var ui_connected := false
 
 func _enter_tree() -> void:
 	# Field builds its collision walls in _ready(), so set its size first.
-	(get_parent().get_node("Field") as Field).size = Vector2(3000, 1200)
+	(get_parent().get_node("Field") as Field).size = Vector2(4000, 2000)
 
 
 func _ready() -> void:
@@ -245,7 +245,7 @@ func _update_ui() -> void:
 			if hud.team_id == team_id:
 				hud.set_match_state(match_time_left, sudden_death, game_over, winner_team)
 				hud.set_player_state(player.hp, player.max_hp, team.owned_clubs,
-					team.used_population, 16)
+					team.used_population, team.population_limit)
 
 
 func _update_match_timer() -> void:
