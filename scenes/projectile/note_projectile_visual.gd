@@ -25,6 +25,12 @@ func _draw() -> void:
 	var outline := PackedVector2Array(NOTE_SHAPE)
 	draw_circle(Vector2.ZERO, 17.0, Color(color, 0.04))
 	draw_circle(Vector2.ZERO, 12.0, Color(color, 0.1))
+	# Fading echoes travel behind the note; drawing stays cached between frames.
+	draw_set_transform(Vector2(0, -26), 0.0, Vector2.ONE * 0.45)
+	draw_colored_polygon(outline, Color(color, 0.1))
+	draw_set_transform(Vector2(0, -15), 0.0, Vector2.ONE * 0.65)
+	draw_colored_polygon(outline, Color(light, 0.22))
+	draw_set_transform(Vector2.ZERO)
 	draw_colored_polygon(outline, color)
 	draw_polyline(outline, Color("20132b"), 1.4, true)
 	draw_line(Vector2(2, -8), Vector2(2, 3), Color(light, 0.9), 1.3, true)

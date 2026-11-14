@@ -6,6 +6,8 @@ const IMPACT_EFFECT = preload("res://scenes/projectile/projectile_impact.gd")
 @export var speed: float = 260.0
 @export var damage: int = 1
 @export var lifetime: float = 4.8
+@export_range(0.0, 24.0, 1.0) var wave_amplitude: float = 0.0
+@export_range(0.1, 6.0, 0.1) var wave_frequency: float = 0.8
 
 var team_id: int = 1
 var direction := Vector2.RIGHT
@@ -13,6 +15,7 @@ var arena_rect := Rect2(0, 0, 1280, 720)
 var consumed: bool = false
 var age: float = 0.0
 var spawn_sequence: int = 0
+var _wave_offset: float = 0.0
 
 
 func _ready() -> void:
@@ -26,6 +29,11 @@ func _physics_process(delta: float) -> void:
 		return
 	age += delta
 	global_position += direction * speed * delta
+	if wave_amplitude > 0.0:
+		# Apply only the change in offset, keeping the original travel axis intact.
+		var next_offset := sin(age * TAU * wave_frequency) * wave_amplitude
+		global_position += direction.orthogonal() * (next_offset - _wave_offset)
+		_wave_offset = next_offset
 	if _inside_stage_safe_zone():
 		consumed = true
 		_show_impact()

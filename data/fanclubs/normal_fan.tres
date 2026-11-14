@@ -10,10 +10,9 @@
 script = ExtResource("1")
 club_id = &"normal"
 display_name = "일반팬"
-description = "한 방향으로 꾸준히 전진하며 응원봉 탄환을 발사합니다.
-예측하기 쉬운 기본형 팬입니다."
+description = "한 방향으로 꾸준히 전진하며 예고한 방향으로 응원봉 탄환을 짧게 3연사합니다."
 sprite_texture = ExtResource("5_basic")
-attack_interval = 2.2
+attack_interval = 3.6
 projectile_lifetime = 6.0
 movement_scene = ExtResource("2")
 attack_scene = ExtResource("3")
