@@ -134,6 +134,11 @@ func _on_capture_confirmed(team_id: int, club: FanClubData) -> void:
 func _on_baton_dropped(idol: IdolPlayer, club: FanClubData, position: Vector2) -> void:
 	var source_team_id: int = carrying_sources.get(idol, 3 - idol.team_id)
 	carrying_sources.erase(idol)
+	call_deferred("_spawn_dropped_baton", idol, club, position, source_team_id)
+
+
+func _spawn_dropped_baton(idol: IdolPlayer, club: FanClubData, position: Vector2,
+		source_team_id: int) -> void:
 	var baton := BATON_SCENE.instantiate() as CaptureBaton
 	baton.dropper = idol
 	baton.position = position

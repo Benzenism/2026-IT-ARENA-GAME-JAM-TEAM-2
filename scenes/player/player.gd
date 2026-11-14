@@ -92,7 +92,8 @@ func _draw() -> void:
 		var points := PackedVector2Array()
 		for point in HEART_POINTS:
 			points.append(point + offset)
-		draw_colored_polygon(points, Color("ed4c5c") if i < hp else Color("414b57"))
+		var heart_color := Color("4c8ded") if team_id == 1 else Color("ed4c9a")
+		draw_colored_polygon(points, heart_color if i < hp else Color("414b57"))
 		draw_polyline(points, Color("1b2029"), 1.5, true)
 
 

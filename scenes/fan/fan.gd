@@ -104,7 +104,7 @@ func _draw() -> void:
 	attack.draw_effect(self)
 	if is_despawning:
 		return
-	var health_color := Color("e845e0") if team_id == 1 else Color("0c56f6")
+	var health_color := Color("0c56f6") if team_id == 1 else Color("e845e0")
 	for i in range(club.max_hp):
 		var offset := Vector2((i - (club.max_hp - 1) * 0.5) * 21.0, 68.0)
 		var points := PackedVector2Array()
