@@ -2,10 +2,13 @@ extends FanMovement
 
 @export var stopping_distance: float = 200.0
 @export var resume_distance: float = 240.0
+@export var max_chase_distance: float = 600.0
+@export var reacquire_distance: float = 550.0
 @export var separation_radius: float = 112.0
 @export var separation_strength: float = 1.5
 
 var is_approaching := true
+var target_in_range := true
 
 
 func get_direction(fan: Fan) -> Vector2:
@@ -13,7 +16,12 @@ func get_direction(fan: Fan) -> Vector2:
 	if fan.has_active_target():
 		var offset := fan.enemy_player.global_position - fan.global_position
 		var distance := offset.length()
-		if distance <= stopping_distance:
+		var chase_limit := maxf(0.0, max_chase_distance)
+		if distance > chase_limit:
+			target_in_range = false
+		elif distance <= clampf(reacquire_distance, 0.0, chase_limit):
+			target_in_range = true
+		if not target_in_range or distance <= stopping_distance:
 			is_approaching = false
 		elif distance >= maxf(stopping_distance, resume_distance):
 			is_approaching = true
