@@ -4,9 +4,10 @@ extends Node2D
 const NORMAL: FanClubData = preload("res://data/fanclubs/normal_fan.tres")
 const ANTI: FanClubData = preload("res://data/fanclubs/anti_fan.tres")
 const DIAGONAL: FanClubData = preload("res://data/fanclubs/diagonal_fan.tres")
+const VERTICAL: FanClubData = preload("res://data/fanclubs/vertical_fan.tres")
 const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
-const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, CAMERA, GUARD]
+const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, VERTICAL, CAMERA, GUARD]
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
 const MATCH_DURATION := 240.0
 

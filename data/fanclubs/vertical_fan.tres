@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="FanClubData" format=3]
+
+[ext_resource type="Script" path="res://scripts/fan/fan_club_data.gd" id="1_data"]
+[ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2_move"]
+[ext_resource type="PackedScene" path="res://behaviors/attack/VerticalAttack.tscn" id="3_attack"]
+[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4_bullet"]
+[ext_resource type="Texture2D" path="res://sprites/fans/fan_vertical.png" id="5_sprite"]
+
+[resource]
+script = ExtResource("1_data")
+club_id = &"vertical"
+display_name = "상하팬"
+description = "전방으로 이동하며 2초마다 위아래로 탄환을 한 발씩 발사합니다."
+sprite_texture = ExtResource("5_sprite")
+population_cost = 2
+attack_interval = 2.0
+projectile_speed = 200.0
+projectile_lifetime = 6.0
+movement_scene = ExtResource("2_move")
+attack_scene = ExtResource("3_attack")
+projectile_scene = ExtResource("4_bullet")
