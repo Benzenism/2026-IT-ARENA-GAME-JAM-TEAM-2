@@ -1,19 +1,24 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://dfmhvwxcojvsj"]
 
-[ext_resource type="Script" path="res://scenes/world/field.gd" id="1_field"]
+[ext_resource type="Script" uid="uid://brlt0r71r5vwe" path="res://scenes/world/field.gd" id="1_field"]
+[ext_resource type="Texture2D" uid="uid://dlcgra3mfc8aa" path="res://sprites/bg.png" id="2_1fp7r"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
 
-[node name="World" type="Node2D"]
+[node name="World" type="Node2D" unique_id=557916526]
 
-[node name="Field" type="Node2D" parent="."]
+[node name="Field" type="Node2D" parent="." unique_id=1296993949]
 script = ExtResource("1_field")
 
-[node name="Player1" parent="." instance=ExtResource("2_player")]
+[node name="Background" type="Sprite2D" parent="Field" unique_id=1326201674]
+scale = Vector2(1.7, 1.7)
+texture = ExtResource("2_1fp7r")
+
+[node name="Player1" parent="." unique_id=2095809743 instance=ExtResource("2_player")]
 position = Vector2(-600, 0)
 color = Color(1, 0.55, 0.55, 1)
 
-[node name="Player2" parent="." instance=ExtResource("2_player")]
+[node name="Player2" parent="." unique_id=1547911868 instance=ExtResource("2_player")]
 position = Vector2(600, 0)
 input_prefix = "p2"
-team_id = 2
 color = Color(0.55, 0.7, 1, 1)
+team_id = 2

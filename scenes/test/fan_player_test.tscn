@@ -1,9 +1,15 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene format=3 uid="uid://5cjkajxy3nmt"]
 
 [ext_resource type="PackedScene" path="res://scenes/main.tscn" id="1_main"]
-[ext_resource type="Script" path="res://scenes/test/fan_player_test.gd" id="2_test"]
+[ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="2_test"]
 
-[node name="FanPlayerTest" instance=ExtResource("1_main")]
+[node name="FanPlayerTest" unique_id=1443702000 instance=ExtResource("1_main")]
 
-[node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World"]
+[node name="LeftViewport" parent="Split/LeftContainer" index="0"]
+size = Vector2i(718, 900)
+
+[node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World" index="3" unique_id=1977355397]
 script = ExtResource("2_test")
+
+[node name="RightViewport" parent="Split/RightContainer" index="0"]
+size = Vector2i(718, 900)

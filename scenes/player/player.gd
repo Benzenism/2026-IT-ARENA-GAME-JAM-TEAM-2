@@ -42,7 +42,7 @@ func _physics_process(delta: float) -> void:
 func _draw() -> void:
 	for i in range(max_hp):
 		var offset := (i - (max_hp - 1) * 0.5) * 8.0
-		draw_circle(Vector2(offset, 62), 2.4,
+		draw_circle(Vector2(offset, 72), 2.4,
 			color if i < hp else Color("35415b"))
 
 

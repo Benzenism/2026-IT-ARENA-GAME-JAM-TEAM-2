@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://behaviors/attack/ForwardAttack.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4"]
+[ext_resource type="Texture2D" uid="uid://cj2kg11xx6w8q" path="res://sprites/fans/fan_basic.png" id="5_basic"]
 
 [resource]
 script = ExtResource("1")
@@ -11,6 +12,8 @@ club_id = &"normal"
 display_name = "일반팬"
 description = "한 방향으로 꾸준히 전진하며 응원봉 탄환을 발사합니다.
 예측하기 쉬운 기본형 팬입니다."
+sprite_texture = ExtResource("5_basic")
+attack_interval = 2.0
 movement_scene = ExtResource("2")
 attack_scene = ExtResource("3")
 projectile_scene = ExtResource("4")

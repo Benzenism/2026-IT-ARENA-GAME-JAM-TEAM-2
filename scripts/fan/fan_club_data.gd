@@ -16,6 +16,7 @@ extends Resource
 @export var move_speed: float = 68.0
 @export_range(1, 16) var population_cost: int = 1
 @export_range(0.05, 30.0) var attack_interval: float = 1.0
+@export_range(0.1, 30.0) var projectile_lifetime: float = 2.0
 
 @export_group("Behaviors")
 @export var movement_scene: PackedScene

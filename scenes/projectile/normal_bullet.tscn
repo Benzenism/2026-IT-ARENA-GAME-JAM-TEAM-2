@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scenes/projectile/projectile.gd" id="1"]
 
 [sub_resource type="CircleShape2D" id="BulletShape"]
-radius = 4.0
+radius = 5.0
 
 [node name="NormalBullet" type="Area2D"]
 collision_layer = 0
@@ -12,6 +12,7 @@ monitorable = false
 script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+scale = Vector2(1.25, 1.25)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("BulletShape")

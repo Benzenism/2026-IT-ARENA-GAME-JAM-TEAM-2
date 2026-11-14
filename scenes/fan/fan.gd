@@ -4,7 +4,7 @@ extends CharacterBody2D
 signal died
 signal despawned(population_cost: int)
 signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
-		team_id: int, bounds: Rect2)
+		team_id: int, bounds: Rect2, lifetime: float)
 
 const CHARGE_DURATION := 0.5
 
@@ -31,7 +31,7 @@ func _ready() -> void:
 	hp = club.max_hp
 	if club.sprite_texture != null:
 		sprite.texture = club.sprite_texture
-		sprite.scale = club.sprite_scale
+		sprite.scale = club.sprite_scale * 1.15
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group("fans")
 	movement = club.movement_scene.instantiate() as FanMovement
@@ -112,7 +112,7 @@ func shoot(direction: Vector2) -> void:
 		return
 	var aim := direction.normalized()
 	shoot_requested.emit(club.projectile_scene, global_position + aim * 23.0,
-		aim, team_id, arena_rect)
+		aim, team_id, arena_rect, club.projectile_lifetime)
 
 
 func take_damage(amount: int) -> void:

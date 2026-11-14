@@ -8,13 +8,13 @@ var active_projectiles: Array[FanProjectile] = []
 
 
 func request_shot(scene: PackedScene, origin: Vector2, direction: Vector2,
-		team_id: int, bounds: Rect2) -> void:
+		team_id: int, bounds: Rect2, lifetime: float) -> void:
 	# Damage signals may arrive while physics overlaps are being flushed.
-	_spawn.call_deferred(scene, origin, direction, team_id, bounds)
+	_spawn.call_deferred(scene, origin, direction, team_id, bounds, lifetime)
 
 
 func _spawn(scene: PackedScene, origin: Vector2, direction: Vector2,
-		team_id: int, bounds: Rect2) -> void:
+		team_id: int, bounds: Rect2, lifetime: float) -> void:
 	if not is_inside_tree() or scene == null or _is_near_idol(origin):
 		return
 	while active_projectiles.size() >= projectile_limit:
@@ -26,6 +26,7 @@ func _spawn(scene: PackedScene, origin: Vector2, direction: Vector2,
 	projectile.team_id = team_id
 	projectile.direction = direction
 	projectile.arena_rect = bounds
+	projectile.lifetime = lifetime
 	projectile.position = to_local(origin)
 	projectile.tree_exited.connect(_on_projectile_tree_exited.bind(projectile))
 	add_child(projectile)
