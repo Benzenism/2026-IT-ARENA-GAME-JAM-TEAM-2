@@ -3,6 +3,7 @@ extends Node2D
 
 const NORMAL: FanClubData = preload("res://data/fanclubs/normal_fan.tres")
 const ANTI: FanClubData = preload("res://data/fanclubs/anti_fan.tres")
+const DIAGONAL: FanClubData = preload("res://data/fanclubs/diagonal_fan.tres")
 const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const PLACEHOLDER: Texture2D = preload("res://icon.svg")
 
@@ -31,7 +32,7 @@ func _ready() -> void:
 		var team := TeamController.new()
 		team.name = "Team%d" % (i + 1)
 		team.team_id = i + 1
-		team.owned_clubs = [NORMAL, ANTI, CAMERA]
+		team.owned_clubs = [NORMAL, ANTI, DIAGONAL, CAMERA]
 		team.enemy_player = players[1 - i]
 		team.fan_container = fans
 		team.projectile_spawner = projectiles

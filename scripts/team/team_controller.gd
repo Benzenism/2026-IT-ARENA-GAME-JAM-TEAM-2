@@ -57,6 +57,8 @@ func spawn_fan(club: FanClubData) -> Fan:
 	fan.team_id = team_id
 	fan.enemy_player = enemy_player
 	fan.arena_rect = arena_rect
+	# Spread out the first shots so simultaneous spawns do not form an unavoidable wall.
+	fan.first_attack_offset = (spawn_count % 4) * 0.18 + (0.15 if team_id == 2 else 0.0)
 	var spawn_x := arena_rect.position.x + 54 if team_id == 1 else arena_rect.end.x - 54
 	var lane := spawn_count % 5
 	var spawn_y := arena_rect.position.y + 68 + lane * (arena_rect.size.y - 136) / 4.0

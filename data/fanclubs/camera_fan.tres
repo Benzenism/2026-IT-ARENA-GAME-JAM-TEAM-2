@@ -2,19 +2,18 @@
 
 [ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1"]
 [ext_resource type="PackedScene" path="res://behaviors/movement/CameraMovement.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://behaviors/attack/DiagonalAttack.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://behaviors/attack/CameraFlashAttack.tscn" id="3"]
 [ext_resource type="Texture2D" uid="uid://b51jea34mj1vo" path="res://sprites/fans/fan_camera.png" id="5_camera"]
 
 [resource]
 script = ExtResource("1")
 club_id = &"camera"
-display_name = "카메라팬"
-description = "10초마다 주변의 무작위 위치로 이동하며 네 대각선으로 탄환을 발사합니다."
+display_name = "홈마"
+description = "10초마다 주변의 무작위 위치로 이동합니다. 4초마다 원형 플래시로 상대 아이돌을 둔화합니다."
 sprite_texture = ExtResource("5_camera")
 move_speed = 90.0
 population_cost = 2
-attack_interval = 5.0
+attack_interval = 4.0
+charge_duration = 1.0
 movement_scene = ExtResource("2")
 attack_scene = ExtResource("3")
-projectile_scene = ExtResource("4")

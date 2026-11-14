@@ -4,12 +4,11 @@ extends CharacterBody2D
 signal died
 signal despawned(population_cost: int)
 signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
-		team_id: int, bounds: Rect2, lifetime: float)
-
-const CHARGE_DURATION := 0.5
+		team_id: int, bounds: Rect2, lifetime: float, speed: float)
 
 @export var club: FanClubData
 @export var team_id: int = 1
+@export var show_trajectory_guides: bool = false
 var enemy_player: CharacterBody2D
 var arena_rect := Rect2(0, 0, 1280, 720)
 var hp: int
@@ -19,6 +18,7 @@ var is_despawning: bool = false
 var has_died: bool = false
 var is_charging: bool = false
 var charge_base_color := Color.WHITE
+var first_attack_offset: float = 0.0
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -41,7 +41,8 @@ func _ready() -> void:
 	add_child(attack)
 	charge_timer = Timer.new()
 	charge_timer.one_shot = true
-	charge_timer.wait_time = CHARGE_DURATION
+	charge_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	charge_timer.wait_time = maxf(0.05, club.charge_duration)
 	charge_timer.timeout.connect(_on_charge_finished)
 	add_child(charge_timer)
 	for ability_scene in club.ability_scenes:
@@ -49,32 +50,61 @@ func _ready() -> void:
 		assert(ability != null)
 		add_child(ability)
 		ability.setup(self)
-	attack_timer.wait_time = maxf(0.05, club.attack_interval - CHARGE_DURATION)
+	attack_timer.wait_time = maxf(0.05, club.attack_interval - charge_timer.wait_time)
 	attack_timer.one_shot = true
 	attack_timer.timeout.connect(_on_attack_timeout)
-	attack_timer.start()
+	attack_timer.start(attack_timer.wait_time + maxf(0.0, first_attack_offset))
 
 func _process(_delta: float) -> void:
 	if is_charging:
-		var progress := 1.0 - (charge_timer.time_left / CHARGE_DURATION)
-		sprite.modulate = charge_base_color.lerp(Color.WHITE, progress)
+		var progress := 1.0 - (charge_timer.time_left / charge_timer.wait_time)
+		# A warm flash remains visible even when the original sprite is white.
+		var warning_color := Color(1.0, 0.68, 0.3, charge_base_color.a)
+		sprite.modulate = charge_base_color.lerp(warning_color, 0.35 + 0.4 * progress)
 
 
 func _physics_process(_delta: float) -> void:
 	if is_despawning:
 		return
-	velocity = movement.get_direction(self).normalized() * club.move_speed
+	velocity = Vector2.ZERO if is_charging else movement.get_direction(self).limit_length(1.0) * club.move_speed
 	move_and_slide()
 	if not arena_rect.grow(24.0).has_point(global_position):
 		exit_map()
 
 
 func _draw() -> void:
+	if is_charging:
+		if show_trajectory_guides:
+			var line_color := Color(1.0, 0.55, 0.55, 0.7) if team_id == 1 else Color(0.55, 0.7, 1.0, 0.7)
+			for direction in attack.prepared_directions:
+				var aim := direction.normalized()
+				if aim.is_zero_approx():
+					continue
+				var origin := aim * 23.0
+				var length := _telegraph_length(global_position + origin, aim)
+				draw_line(origin, origin + aim * length, Color(line_color, 0.18), 8.0, true)
+				draw_line(origin, origin + aim * length, line_color, 2.5, true)
+		attack.draw_telegraph(self)
+	attack.draw_effect(self)
 	var health_color := Color("f16f8a") if team_id == 1 else Color("69a9ff")
 	for i in range(club.max_hp):
 		var offset := (i - (club.max_hp - 1) * 0.5) * 6.0
 		draw_circle(Vector2(offset, 30), 1.8,
 			health_color if i < hp else Color("35415b"))
+
+
+func _telegraph_length(origin: Vector2, direction: Vector2) -> float:
+	var bounds := arena_rect.grow(28.0)
+	var length := club.projectile_speed * club.projectile_lifetime
+	if direction.x > 0.001:
+		length = minf(length, (bounds.end.x - origin.x) / direction.x)
+	elif direction.x < -0.001:
+		length = minf(length, (bounds.position.x - origin.x) / direction.x)
+	if direction.y > 0.001:
+		length = minf(length, (bounds.end.y - origin.y) / direction.y)
+	elif direction.y < -0.001:
+		length = minf(length, (bounds.position.y - origin.y) / direction.y)
+	return maxf(0.0, length)
 
 
 func forward_dir() -> Vector2:
@@ -93,9 +123,11 @@ func is_combat_active() -> bool:
 func _on_attack_timeout() -> void:
 	if not is_combat_active():
 		return
+	attack.prepare(self)
 	is_charging = true
 	charge_base_color = sprite.modulate
 	charge_timer.start()
+	queue_redraw()
 
 
 func _on_charge_finished() -> void:
@@ -104,7 +136,8 @@ func _on_charge_finished() -> void:
 	is_charging = false
 	sprite.modulate = charge_base_color
 	attack.fire(self)
-	attack_timer.start()
+	queue_redraw()
+	attack_timer.start(maxf(0.05, club.attack_interval - charge_timer.wait_time))
 
 
 func shoot(direction: Vector2) -> void:
@@ -112,7 +145,7 @@ func shoot(direction: Vector2) -> void:
 		return
 	var aim := direction.normalized()
 	shoot_requested.emit(club.projectile_scene, global_position + aim * 23.0,
-		aim, team_id, arena_rect, club.projectile_lifetime)
+		aim, team_id, arena_rect, club.projectile_lifetime, club.projectile_speed)
 
 
 func take_damage(amount: int) -> void:

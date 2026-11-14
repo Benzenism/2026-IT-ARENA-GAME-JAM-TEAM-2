@@ -1,9 +1,10 @@
 extends FanAttack
-## Aim at the current target position; bullets do not home after firing.
+## Lock the target position when the warning starts; shots never home.
 
 
-func fire(fan: Fan) -> void:
+func prepare(fan: Fan) -> void:
 	if fan.has_active_target():
-		fan.shoot(fan.global_position.direction_to(fan.enemy_player.global_position))
+		var direction := fan.global_position.direction_to(fan.enemy_player.global_position)
+		prepared_directions = [fan.forward_dir() if direction.is_zero_approx() else direction]
 	else:
-		fan.shoot(fan.forward_dir())
+		prepared_directions = [fan.forward_dir()]

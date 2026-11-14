@@ -10,6 +10,7 @@ var direction := Vector2.RIGHT
 var arena_rect := Rect2(0, 0, 1280, 720)
 var consumed: bool = false
 var age: float = 0.0
+var spawn_sequence: int = 0
 
 
 func _ready() -> void:
