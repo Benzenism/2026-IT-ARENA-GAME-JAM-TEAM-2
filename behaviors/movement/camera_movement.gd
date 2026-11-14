@@ -2,9 +2,9 @@ extends FanMovement
 
 const SAFE_ZONE = preload("res://scripts/fan/safe_zone_geometry.gd")
 
-## Wait ten seconds, then move toward a random nearby position.
-@export var move_interval: float = 10.0
-@export var move_radius: float = 180.0
+## Periodically move toward a random nearby position.
+@export var move_interval: float = 6.0
+@export var move_radius: float = 300.0
 @export var stopping_distance: float = 8.0
 @export var minimum_spacing: float = 120.0
 @export_range(0.0, 1.0, 0.05) var forward_move_chance: float = 1.0

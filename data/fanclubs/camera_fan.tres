@@ -9,9 +9,9 @@
 script = ExtResource("1")
 club_id = &"camera"
 display_name = "홈마"
-description = "10초마다 주변의 무작위 위치로 이동합니다. 4초마다 원형 플래시로 상대 아이돌을 둔화합니다."
+description = "6초마다 주변의 무작위 위치로 이동합니다. 4초마다 원형 플래시로 상대 아이돌을 둔화합니다."
 sprite_texture = ExtResource("5_camera")
-move_speed = 90.0
+move_speed = 140.0
 population_cost = 2
 attack_interval = 4.0
 charge_duration = 1.0
