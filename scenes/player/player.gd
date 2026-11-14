@@ -9,6 +9,11 @@ extends CharacterBody2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
 
+const HIT_INVULNERABILITY := 1.0
+const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
+	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
+	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
+
 signal health_changed(current_hp: int, maximum_hp: int)
 signal respawned
 signal baton_dropped(player: IdolPlayer, club: FanClubData, position: Vector2)
@@ -21,6 +26,8 @@ var carried_club: FanClubData
 var respawn_timer: Timer
 var own_stage_center := Vector2.ZERO
 var own_stage_radius := 220.0
+var slow_remaining: float = 0.0
+var slow_multiplier: float = 1.0
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _baton_sprite: Sprite2D = $BatonSprite
@@ -40,6 +47,14 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	invulnerability = maxf(0.0, invulnerability - delta)
+	if slow_remaining > 0.0:
+		slow_remaining = maxf(0.0, slow_remaining - delta)
+		if slow_remaining == 0.0:
+			slow_multiplier = 1.0
+	var display_color := color.lerp(Color.WHITE, 0.45) if slow_remaining > 0.0 else color
+	if invulnerability > 0.0 and int(invulnerability * 10.0) % 2 == 0:
+		display_color.a *= 0.4
+	_sprite.modulate = display_color
 	if not is_combat_active():
 		return
 	# get_vector는 입력 벡터 길이를 최대 1로 제한함.
@@ -50,7 +65,7 @@ func _physics_process(delta: float) -> void:
 		input_prefix + "_up",
 		input_prefix + "_down"
 	)
-	velocity = direction * speed * (0.8 if carried_club != null else 1.0)
+	velocity = direction * speed * (0.8 if carried_club != null else 1.0) * slow_multiplier
 	if movement_locked:
 		velocity = Vector2.ZERO
 		move_and_slide()
@@ -73,9 +88,12 @@ func _process(_delta: float) -> void:
 
 func _draw() -> void:
 	for i in range(max_hp):
-		var offset := (i - (max_hp - 1) * 0.5) * 8.0
-		draw_circle(Vector2(offset, 72), 2.4,
-			color if i < hp else Color("35415b"))
+		var offset := Vector2((i - (max_hp - 1) * 0.5) * 21.0, 83.0)
+		var points := PackedVector2Array()
+		for point in HEART_POINTS:
+			points.append(point + offset)
+		draw_colored_polygon(points, Color("ed4c5c") if i < hp else Color("414b57"))
+		draw_polyline(points, Color("1b2029"), 1.5, true)
 
 
 func is_combat_active() -> bool:
@@ -117,11 +135,20 @@ func drop_carried_baton() -> void:
 	baton_dropped.emit(self, club, global_position)
 
 
+func apply_slow(multiplier: float, duration: float) -> void:
+	if duration <= 0.0 or invulnerability > 0.0 or not is_combat_active():
+		return
+	# Repeated flashes refresh the duration instead of multiplying the slowdown.
+	slow_multiplier = minf(slow_multiplier, clampf(multiplier, 0.0, 1.0))
+	slow_remaining = maxf(slow_remaining, duration)
+
+
 func take_damage(amount: int) -> void:
 	if amount <= 0 or invulnerability > 0 or not is_combat_active():
 		return
 	drop_carried_baton()
 	hp = maxi(0, hp - amount)
+	invulnerability = HIT_INVULNERABILITY
 	queue_redraw()
 	health_changed.emit(hp, max_hp)
 	if hp == 0:
@@ -136,6 +163,8 @@ func respawn() -> void:
 	invulnerability = 2.0
 	_sprite.visible = true
 	set_movement_locked(false)
+	slow_remaining = 0.0
+	slow_multiplier = 1.0
 	reset_physics_interpolation()
 	queue_redraw()
 	health_changed.emit(hp, max_hp)

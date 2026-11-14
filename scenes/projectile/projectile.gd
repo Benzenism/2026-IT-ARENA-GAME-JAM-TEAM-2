@@ -10,6 +10,7 @@ var direction := Vector2.RIGHT
 var arena_rect := Rect2(0, 0, 1280, 720)
 var consumed: bool = false
 var age: float = 0.0
+var spawn_sequence: int = 0
 
 
 func _ready() -> void:
@@ -35,6 +36,31 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if body.has_method("is_damageable") and not body.is_damageable():
 		return
+	# If both shapes touch the same bullet, the defending fan gets the hit.
+	if body.is_in_group("idols"):
+		var guard := _overlapping_guard(body)
+		if guard != null:
+			body = guard
 	consumed = true
 	body.take_damage(damage)
 	queue_free()
+
+
+func _overlapping_guard(idol: Node2D) -> Fan:
+	var collision := $CollisionShape2D as CollisionShape2D
+	var query := PhysicsShapeQueryParameters2D.new()
+	query.shape = collision.shape
+	query.transform = collision.global_transform
+	query.collision_mask = 2
+	var nearest: Fan
+	var nearest_distance := INF
+	for result in get_world_2d().direct_space_state.intersect_shape(query, 128):
+		var guard := result.collider as Fan
+		if guard == null or not guard.is_in_group("projectile_guards") \
+				or guard.team_id != idol.get("team_id") or not guard.is_combat_active():
+			continue
+		var distance := global_position.distance_squared_to(guard.global_position)
+		if distance < nearest_distance:
+			nearest = guard
+			nearest_distance = distance
+	return nearest

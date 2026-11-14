@@ -3,7 +3,10 @@ extends Node2D
 
 const NORMAL: FanClubData = preload("res://data/fanclubs/normal_fan.tres")
 const ANTI: FanClubData = preload("res://data/fanclubs/anti_fan.tres")
+const DIAGONAL: FanClubData = preload("res://data/fanclubs/diagonal_fan.tres")
 const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
+const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
+const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, CAMERA, GUARD]
 const PLACEHOLDER: Texture2D = preload("res://icon.svg")
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
 const MATCH_DURATION := 240.0
@@ -51,15 +54,14 @@ func _ready() -> void:
 	projectiles = ProjectileSpawner.new()
 	projectiles.name = "Projectiles"
 	add_child(projectiles)
+	var distributed_clubs := _randomize_team_clubs()
 	for i in range(2):
 		var team := TeamController.new()
 		team.name = "Team%d" % (i + 1)
 		team.team_id = i + 1
-		if i == 0:
-			team.owned_clubs.append(NORMAL)
-			team.owned_clubs.append(CAMERA)
-		else:
-			team.owned_clubs.append(ANTI)
+		for club in distributed_clubs[i]:
+			team.owned_clubs.append(club)
+		team.ally_player = players[i]
 		team.enemy_player = players[1 - i]
 		team.fan_container = fans
 		team.projectile_spawner = projectiles
@@ -73,6 +75,19 @@ func _ready() -> void:
 	call_deferred("_connect_ui")
 
 
+func _randomize_team_clubs() -> Array:
+	var shuffled_clubs := ALL_CLUBS.duplicate()
+	shuffled_clubs.shuffle()
+	var teams_clubs: Array = [[], []]
+	for index in range(shuffled_clubs.size()):
+		teams_clubs[index % 2].append(shuffled_clubs[index])
+	if teams_clubs[0].is_empty():
+		teams_clubs[0].append(teams_clubs[1].pop_back())
+	if teams_clubs[1].is_empty():
+		teams_clubs[1].append(teams_clubs[0].pop_back())
+	return teams_clubs
+
+
 func _on_fan_spawned(fan: Fan) -> void:
 	# Use the existing project icon only when the club has no sprite configured.
 	if fan.sprite.texture == null:
@@ -82,6 +97,9 @@ func _on_fan_spawned(fan: Fan) -> void:
 
 
 func _process(_delta: float) -> void:
+	if Input.is_action_just_pressed("ui_accept"):
+		get_tree().reload_current_scene()
+		return
 	if not ui_connected:
 		_connect_ui()
 	# Give otherwise invisible bullets a temporary marker in this test scene only.
