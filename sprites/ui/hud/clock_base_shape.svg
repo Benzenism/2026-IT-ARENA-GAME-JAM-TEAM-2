@@ -1,0 +1,26 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1980" height="204.677" viewBox="0 0 1980 204.677" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<g id="base">
+<use xlink:href="#stroke0_0_188" fill="#1A0F2E" fill-opacity="0.95"/>
+<use xlink:href="#stroke0_0_188" fill="url(#paint0_linear_0_188)"/>
+</g>
+<defs>
+<filter id="filter0_d_0_188" x="0" y="2.38419e-07" width="1980" height="204.677" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="-3"/>
+<feGaussianBlur stdDeviation="5"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0431373 0 0 0 0 0.0196078 0 0 0 0 0.0862745 0 0 0 0.5 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_188"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_188" result="shape"/>
+</filter>
+<linearGradient id="paint0_linear_0_188" x1="10" y1="103.677" x2="1970" y2="103.677" gradientUnits="userSpaceOnUse">
+<stop stop-color="#4C8DFF" stop-opacity="0.55"/>
+<stop offset="0.3" stop-color="#4C8DFF" stop-opacity="0.1"/>
+<stop offset="0.42" stop-color="#4C8DFF" stop-opacity="0"/>
+<stop offset="0.58" stop-color="#FF5FA8" stop-opacity="0"/>
+<stop offset="0.7" stop-color="#FF5FA8" stop-opacity="0.1"/>
+<stop offset="1" stop-color="#FF5FA8" stop-opacity="0.55"/>
+</linearGradient>
+<path id="stroke0_0_188" d="M10 29.005C10 18.9706 19.1298 11.4127 28.9877 13.2864L823.178 164.24C830.642 165.659 838.074 161.633 840.964 154.607L875.923 69.5923C878.39 63.5934 884.234 59.6774 890.721 59.6774H1089.28C1095.77 59.6774 1101.61 63.5934 1104.08 69.5923L1139.04 154.607C1141.93 161.633 1149.36 165.659 1156.82 164.24L1951.01 13.2864C1960.87 11.4127 1970 18.9706 1970 29.005V181.677C1970 190.514 1962.84 197.677 1954 197.677H26C17.1635 197.677 10 190.514 10 181.677V29.005Z"/>
+</defs>
+</svg>
