@@ -112,11 +112,20 @@ func _on_stage_idol_entered(idol: IdolPlayer, stage: IdolStage) -> void:
 	if defending_team.owned_clubs.is_empty():
 		_finish_game(idol.team_id)
 		return
+	if _has_dropped_baton(idol):
+		return
 	var menu := _menu(idol.team_id)
 	if menu == null or menu.active:
 		return
 	idol.set_movement_locked(true)
 	menu.open_menu(defending_team.owned_clubs)
+
+
+func _has_dropped_baton(idol: IdolPlayer) -> bool:
+	for baton in dropped_batons:
+		if is_instance_valid(baton) and baton.dropper == idol:
+			return true
+	return false
 
 
 func _on_capture_confirmed(team_id: int, club: FanClubData) -> void:
@@ -161,6 +170,17 @@ func _on_baton_picked_up(baton: CaptureBaton, idol: IdolPlayer) -> void:
 func _on_baton_returned(baton: CaptureBaton) -> void:
 	_remove_dropped_baton(baton)
 	baton.queue_free()
+	if is_instance_valid(baton.dropper):
+		call_deferred("_recheck_capture_stage", baton.dropper)
+
+
+func _recheck_capture_stage(idol: IdolPlayer) -> void:
+	if not is_instance_valid(idol) or not idol.is_inside_tree():
+		return
+	for stage in stages:
+		if stage.team_id != idol.team_id and stage.get_overlapping_bodies().has(idol):
+			_on_stage_idol_entered(idol, stage)
+			return
 
 
 func _complete_capture(idol: IdolPlayer) -> void:
