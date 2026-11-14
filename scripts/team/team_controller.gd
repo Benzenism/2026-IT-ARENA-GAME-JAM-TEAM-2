@@ -1,0 +1,77 @@
+class_name TeamController
+extends Node
+
+signal population_changed
+signal fan_spawned(fan: Fan)
+
+const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
+
+@export var team_id: int = 1
+@export var population_limit: int = 16
+@export var owned_clubs: Array[FanClubData] = []
+@export var spawn_interval: float = 1.15
+
+var used_population: int = 0
+var next_spawn_index: int = 0
+var spawn_count: int = 0
+var enemy_player: PrototypePlayer
+var fan_container: Node2D
+var projectile_spawner: ProjectileSpawner
+var arena_rect := Rect2(48, 230, 1344, 480)
+var spawn_timer: Timer
+
+
+func _ready() -> void:
+	spawn_timer = Timer.new()
+	spawn_timer.wait_time = maxf(0.05, spawn_interval)
+	spawn_timer.process_callback = Timer.TIMER_PROCESS_PHYSICS
+	spawn_timer.timeout.connect(try_spawn)
+	add_child(spawn_timer)
+	spawn_timer.start()
+
+
+func try_spawn() -> Fan:
+	var count := owned_clubs.size()
+	if count == 0:
+		return null
+	for offset in range(count):
+		var index := (next_spawn_index + offset) % count
+		var club := owned_clubs[index]
+		if club == null or used_population + club.population_cost > population_limit:
+			continue
+		var fan := spawn_fan(club)
+		if fan != null:
+			next_spawn_index = (index + 1) % count
+		return fan
+	return null
+
+
+func spawn_fan(club: FanClubData) -> Fan:
+	if club == null or not is_instance_valid(fan_container) \
+			or not is_instance_valid(projectile_spawner):
+		return null
+	if used_population + club.population_cost > population_limit:
+		return null
+	var fan := FAN_SCENE.instantiate() as Fan
+	fan.club = club
+	fan.team_id = team_id
+	fan.enemy_player = enemy_player
+	fan.arena_rect = arena_rect
+	var spawn_x := arena_rect.position.x + 54 if team_id == 1 else arena_rect.end.x - 54
+	var lane := spawn_count % 5
+	var spawn_y := arena_rect.position.y + 68 + lane * (arena_rect.size.y - 136) / 4.0
+	fan.position = fan_container.to_local(Vector2(spawn_x, spawn_y))
+	fan.despawned.connect(_on_fan_despawned)
+	fan.shoot_requested.connect(projectile_spawner.request_shot)
+	# Reserve the cost before entering the tree, where callbacks may execute.
+	used_population += club.population_cost
+	spawn_count += 1
+	fan_container.add_child(fan)
+	population_changed.emit()
+	fan_spawned.emit(fan)
+	return fan
+
+
+func _on_fan_despawned(cost: int) -> void:
+	used_population = maxi(0, used_population - cost)
+	population_changed.emit()
