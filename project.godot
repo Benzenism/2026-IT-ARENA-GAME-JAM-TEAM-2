@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="magicalidols"
-run/main_scene="uid://5cjkajxy3nmt"
+run/main_scene="res://scenes/test/fan_player_test.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
