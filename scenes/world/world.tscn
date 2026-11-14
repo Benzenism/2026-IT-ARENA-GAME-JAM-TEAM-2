@@ -27,11 +27,11 @@ team_id = 2
 stage_texture = ExtResource("5_stage2")
 
 [node name="Player1" parent="." unique_id=2095809743 instance=ExtResource("2_player")]
-position = Vector2(-600, 0)
+position = Vector2(-900, 0)
 color = Color(1, 0.55, 0.55, 1)
 
 [node name="Player2" parent="." unique_id=1547911868 instance=ExtResource("2_player")]
-position = Vector2(600, 0)
+position = Vector2(900, 0)
 input_prefix = "p2"
 color = Color(0.55, 0.7, 1, 1)
 team_id = 2

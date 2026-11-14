@@ -32,7 +32,13 @@ func _physics_process(delta: float) -> void:
 
 
 func _on_body_entered(body: Node2D) -> void:
-	if consumed or not body.has_method("take_damage") or body.get("team_id") == team_id:
+	if consumed:
+		return
+	if body.is_in_group("stage_safe_zones"):
+		consumed = true
+		queue_free()
+		return
+	if not body.has_method("take_damage") or body.get("team_id") == team_id:
 		return
 	if body.has_method("is_combat_active") and not body.is_combat_active():
 		return

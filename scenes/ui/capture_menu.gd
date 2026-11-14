@@ -14,13 +14,11 @@ var active: bool = false
 @onready var title_label: Label = %Title
 @onready var options_label: Label = %Options
 @onready var hint_label: Label = %Hint
-@onready var selection_timer: Timer = $SelectionTimer
 
 
 func _ready() -> void:
 	visible = false
 	add_to_group("capture_menus")
-	selection_timer.timeout.connect(_on_selection_timer_timeout)
 
 
 func open_menu(clubs: Array[FanClubData]) -> void:
@@ -30,14 +28,12 @@ func open_menu(clubs: Array[FanClubData]) -> void:
 	selection = 0
 	active = true
 	visible = true
-	selection_timer.start(2.5)
 	_refresh()
 
 
 func close_menu() -> void:
 	active = false
 	visible = false
-	selection_timer.stop()
 
 
 func _process(_delta: float) -> void:
@@ -69,7 +65,3 @@ func _refresh() -> void:
 		rows.append("%s %s" % [marker, options[i].display_name])
 	options_label.text = "\n".join(rows)
 	hint_label.text = "UP/DOWN SELECT    RIGHT CONFIRM"
-
-
-func _on_selection_timer_timeout() -> void:
-	_confirm_selection()
