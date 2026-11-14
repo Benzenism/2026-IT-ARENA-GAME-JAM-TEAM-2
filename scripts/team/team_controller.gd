@@ -5,6 +5,11 @@ signal population_changed
 signal fan_spawned(fan: Fan)
 
 const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
+const SAFE_ZONE = preload("res://scripts/fan/safe_zone_geometry.gd")
+const SPAWN_MIN_RADIUS := 320.0
+const SPAWN_MAX_RADIUS := 760.0
+const SPAWN_MARGIN := 12.0
+const SPAWN_ATTEMPTS := 256
 
 @export var team_id: int = 1
 @export var population_limit: int = 24
@@ -20,6 +25,7 @@ var enemy_player: CharacterBody2D
 var fan_container: Node2D
 var projectile_spawner: ProjectileSpawner
 var arena_rect := Rect2(0, 0, 1280, 720)
+var spawn_center := Vector2.ZERO
 var spawn_timer: Timer
 var respawn_cooldowns: Dictionary = {}
 
@@ -92,6 +98,9 @@ func spawn_fan(club: FanClubData) -> Fan:
 		return null
 	if club.requires_ally_player and not _has_ally_player():
 		return null
+	var spawn_position: Variant = _find_spawn_position(club)
+	if spawn_position == null:
+		return null
 	var fan := FAN_SCENE.instantiate() as Fan
 	fan.club = club
 	fan.team_id = team_id
@@ -100,10 +109,7 @@ func spawn_fan(club: FanClubData) -> Fan:
 	fan.arena_rect = arena_rect
 	# Spread out the first shots so simultaneous spawns do not form an unavoidable wall.
 	fan.first_attack_offset = (spawn_count % 4) * 0.18 + (0.15 if team_id == 2 else 0.0)
-	var spawn_x := arena_rect.position.x + 600 if team_id == 1 else arena_rect.end.x - 600
-	var lane := spawn_count % 8
-	var spawn_y := arena_rect.position.y + 400 + lane * (arena_rect.size.y - 800) / 7.0
-	fan.position = fan_container.to_local(Vector2(spawn_x, spawn_y))
+	fan.position = fan_container.to_local(spawn_position)
 	fan.despawned.connect(_on_fan_despawned)
 	fan.died.connect(_on_fan_died.bind(club))
 	fan.shoot_requested.connect(projectile_spawner.request_shot)
@@ -113,6 +119,50 @@ func spawn_fan(club: FanClubData) -> Fan:
 	population_changed.emit()
 	fan_spawned.emit(fan)
 	return fan
+
+
+func _find_spawn_position(club: FanClubData) -> Variant:
+	var body_radius := maxf(1.0, club.hitbox_radius)
+	var bounds := arena_rect.grow(-body_radius - SPAWN_MARGIN)
+	if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
+		return null
+	var zones: Array[CollisionShape2D] = SAFE_ZONE.zones_in_world(fan_container)
+	for _attempt in SPAWN_ATTEMPTS:
+		var angle := randf_range(0.0, TAU)
+		var distance := sqrt(randf_range(SPAWN_MIN_RADIUS * SPAWN_MIN_RADIUS,
+				SPAWN_MAX_RADIUS * SPAWN_MAX_RADIUS))
+		var candidate := spawn_center + Vector2.from_angle(angle) * distance
+		if not bounds.has_point(candidate) or not SAFE_ZONE.is_clear(candidate, body_radius, SPAWN_MARGIN, zones):
+			continue
+		# Forward-moving fans must not start behind a safe zone they cannot cross.
+		if club.movement_scene.resource_path == "res://behaviors/movement/ForwardMovement.tscn":
+			var edge_x := bounds.end.x if team_id == 1 else bounds.position.x
+			if not SAFE_ZONE.path_is_clear(candidate, Vector2(edge_x, candidate.y),
+					body_radius, SPAWN_MARGIN, zones):
+				continue
+		if _spawn_position_is_clear(candidate, body_radius):
+			return candidate
+	return null
+
+
+func _spawn_position_is_clear(candidate: Vector2, body_radius: float) -> bool:
+	for node in get_tree().get_nodes_in_group("fans"):
+		var other := node as Fan
+		if other == null or not other.is_combat_active() or other.get_world_2d() != fan_container.get_world_2d():
+			continue
+		var separation := body_radius + maxf(1.0, other.club.hitbox_radius) + SPAWN_MARGIN
+		if candidate.distance_squared_to(other.global_position) < separation * separation:
+			return false
+	for node in get_tree().get_nodes_in_group("idols"):
+		var idol := node as Node2D
+		if idol == null or not idol.is_inside_tree() or idol.get_world_2d() != fan_container.get_world_2d():
+			continue
+		var collision := idol.get_node_or_null("CollisionShape2D") as CollisionShape2D
+		var idol_radius := SAFE_ZONE.radius(collision) if collision != null and collision.shape is CircleShape2D else 48.0
+		var separation := body_radius + idol_radius + SPAWN_MARGIN
+		if candidate.distance_squared_to(idol.global_position) < separation * separation:
+			return false
+	return true
 
 
 func _has_ally_player() -> bool:
