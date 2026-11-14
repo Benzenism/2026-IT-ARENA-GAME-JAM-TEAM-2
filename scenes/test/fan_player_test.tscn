@@ -11,17 +11,11 @@ script = ExtResource("2_test")
 [node name="LeftOverlay" parent="Split/LeftContainer" index="1"]
 layout_mode = 2
 
-[node name="Player1Hud" parent="Split/LeftContainer/LeftOverlay" index="0"]
-layout_mode = 1
-
-[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" index="1"]
+[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" index="0"]
 layout_mode = 1
 
 [node name="RightOverlay" parent="Split/RightContainer" index="1"]
 layout_mode = 2
 
-[node name="Player2Hud" parent="Split/RightContainer/RightOverlay" index="0"]
-layout_mode = 1
-
-[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" index="1"]
+[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" index="0"]
 layout_mode = 1
