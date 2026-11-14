@@ -14,6 +14,7 @@ extends CharacterBody2D
 const HIT_INVULNERABILITY := 1.0
 const BOUNCE_COOLDOWN := 0.3
 const BOUNCE_INPUT_LOCK := 0.12
+const DIAGONAL_SPEED_MULTIPLIER := 1.1
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
@@ -72,14 +73,11 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
-	# get_vector는 입력 벡터 길이를 최대 1로 제한함.
-	# 그래서 대각선(→+↓)이어도 (0.707, 0.707)이 되어 속도가 빨라지지 않음.
-	var direction := Input.get_vector(
-		input_prefix + "_left",
-		input_prefix + "_right",
-		input_prefix + "_up",
-		input_prefix + "_down"
-	)
+	# 대각선 이동 속도를 기본 속도의 1.1배까지 허용한다.
+	var direction := Vector2(
+		Input.get_axis(input_prefix + "_left", input_prefix + "_right"),
+		Input.get_axis(input_prefix + "_up", input_prefix + "_down")
+	).limit_length(DIAGONAL_SPEED_MULTIPLIER)
 	var max_speed := maxf(0.0, speed * (0.8 if carried_club != null else 1.0) * slow_multiplier)
 	movement_velocity = direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
 	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
