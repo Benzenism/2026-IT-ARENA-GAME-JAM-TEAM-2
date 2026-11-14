@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/main.tscn" id="1_main"]
+[ext_resource type="Script" path="res://scripts/test/fan_player_test.gd" id="2_test"]
+
+[node name="FanPlayerTest" instance=ExtResource("1_main")]
+
+[node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World"]
+script = ExtResource("2_test")

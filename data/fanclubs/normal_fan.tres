@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="FanClubData" format=3 uid="uid://dmot4hpq1vnle"]
+
+[ext_resource type="Script" uid="uid://bkvlr2fgfglxw" path="res://scripts/fan/fan_club_data.gd" id="1"]
+[ext_resource type="PackedScene" path="res://behaviors/movement/ForwardMovement.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://behaviors/attack/ForwardAttack.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://scenes/projectile/normal_bullet.tscn" id="4"]
+
+[resource]
+script = ExtResource("1")
+club_id = &"normal"
+display_name = "일반팬"
+description = "한 방향으로 꾸준히 전진하며 응원봉 탄환을 발사합니다.
+예측하기 쉬운 기본형 팬입니다."
+movement_scene = ExtResource("2")
+attack_scene = ExtResource("3")
+projectile_scene = ExtResource("4")

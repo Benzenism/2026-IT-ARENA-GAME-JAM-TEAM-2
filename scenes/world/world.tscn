@@ -15,4 +15,5 @@ color = Color(1, 0.55, 0.55, 1)
 [node name="Player2" parent="." instance=ExtResource("2_player")]
 position = Vector2(600, 0)
 input_prefix = "p2"
+team_id = 2
 color = Color(0.55, 0.7, 1, 1)
