@@ -70,10 +70,12 @@ func _ready() -> void:
 		team.fan_container = fans
 		team.projectile_spawner = projectiles
 		team.arena_rect = bounds
+		team.spawn_center = stages[i].global_position
 		add_child(team)
 		teams.append(team)
-		team.try_spawn()
-		team.try_spawn()
+		for _attempt in team.population_limit:
+			if team.try_spawn() == null:
+				break
 	add_to_group("game_controller")
 	call_deferred("_connect_ui")
 
