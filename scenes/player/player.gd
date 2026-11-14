@@ -60,6 +60,7 @@ func _ready() -> void:
 	_sprite.texture = player_texture
 	hp = max_hp
 	facing_direction = Vector2.RIGHT if team_id == 1 else Vector2.LEFT
+	_sprite.flip_h = team_id == 1
 	spawn_position = global_position
 	respawn_timer = Timer.new()
 	respawn_timer.one_shot = true
@@ -99,6 +100,8 @@ func _physics_process(delta: float) -> void:
 	).limit_length(DIAGONAL_SPEED_MULTIPLIER)
 	if not direction.is_zero_approx():
 		facing_direction = direction.normalized()
+	if not is_zero_approx(direction.x):
+		_sprite.flip_h = direction.x > 0.0
 	var max_speed := maxf(0.0, speed * (0.8 if carried_club != null else 1.0) * slow_multiplier)
 	movement_velocity = direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
 	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
