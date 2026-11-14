@@ -14,7 +14,7 @@ extends CharacterBody2D
 const HIT_INVULNERABILITY := 1.0
 const BOUNCE_COOLDOWN := 0.3
 const BOUNCE_INPUT_LOCK := 0.12
-const DIAGONAL_SPEED_MULTIPLIER := 1.1
+const DIAGONAL_SPEED_MULTIPLIER := 1.2
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
@@ -73,7 +73,7 @@ func _physics_process(delta: float) -> void:
 		velocity = Vector2.ZERO
 		move_and_slide()
 		return
-	# 대각선 이동 속도를 기본 속도의 1.1배까지 허용한다.
+	# 대각선 이동 속도를 기본 속도의 1.2배까지 허용한다.
 	var direction := Vector2(
 		Input.get_axis(input_prefix + "_left", input_prefix + "_right"),
 		Input.get_axis(input_prefix + "_up", input_prefix + "_down")
