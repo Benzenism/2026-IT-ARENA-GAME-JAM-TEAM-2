@@ -26,7 +26,7 @@ var ui_connected := false
 
 func _enter_tree() -> void:
 	# Field builds its collision walls in _ready(), so set its size first.
-	(get_parent().get_node("Field") as Field).size = Vector2(2200, 1200)
+	(get_parent().get_node("Field") as Field).size = Vector2(3000, 1200)
 
 
 func _ready() -> void:
