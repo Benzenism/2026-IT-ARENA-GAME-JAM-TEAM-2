@@ -1,20 +1,27 @@
 [gd_scene format=3 uid="uid://ct63llitjees7"]
 
 [ext_resource type="Script" uid="uid://bw2gir6chtaeu" path="res://scenes/projectile/projectile.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://dxxb1vyp6ojm3" path="res://icon.svg" id="2_mh6nm"]
+[ext_resource type="Script" path="res://scenes/projectile/projectile_visual.gd" id="2_visual"]
+[ext_resource type="Shader" path="res://scenes/projectile/projectile_glow.gdshader" id="3_glow"]
 
 [sub_resource type="CircleShape2D" id="BulletShape"]
-radius = 5.0
+radius = 7.5
+
+[sub_resource type="ShaderMaterial" id="ShotGlow"]
+shader = ExtResource("3_glow")
 
 [node name="NormalBullet" type="Area2D" unique_id=1735424640]
 collision_layer = 0
 collision_mask = 7
-monitorable = false
 script = ExtResource("1")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1779169279]
 scale = Vector2(0.2, 0.2)
-texture = ExtResource("2_mh6nm")
+
+[node name="ProjectileVisual" type="Node2D" parent="."]
+material = SubResource("ShotGlow")
+scale = Vector2(1.5, 1.5)
+script = ExtResource("2_visual")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=428598497]
 shape = SubResource("BulletShape")
