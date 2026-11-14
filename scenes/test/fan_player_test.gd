@@ -31,6 +31,10 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	var scene_root := get_tree().current_scene
+	var left_viewport := scene_root.get_node("Split/LeftContainer/LeftViewport") as SubViewport
+	var right_viewport := scene_root.get_node("Split/RightContainer/RightViewport") as SubViewport
+	right_viewport.world_2d = left_viewport.world_2d
 	var world := get_parent()
 	var field := world.get_node("Field") as Field
 	players = [

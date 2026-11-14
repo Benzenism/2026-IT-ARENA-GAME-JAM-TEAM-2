@@ -1,21 +1,96 @@
-[gd_scene format=3 uid="uid://5cjkajxy3nmt"]
+[gd_scene load_steps=6 format=3 uid="uid://5cjkajxy3nmt"]
 
-[ext_resource type="PackedScene" path="res://scenes/main.tscn" id="1_main"]
-[ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="2_test"]
+[ext_resource type="PackedScene" path="res://scenes/world/world.tscn" id="2_world"]
+[ext_resource type="Script" path="res://scenes/camera/follow_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" path="res://scenes/ui/hud_overlay.tscn" id="4_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/capture_menu.tscn" id="5_menu"]
+[ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="6_test"]
 
-[node name="FanPlayerTest" unique_id=1443702000 instance=ExtResource("1_main")]
+[node name="FanPlayerTest" type="Control" unique_id=1443702000]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
-[node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World" index="3" unique_id=1977355397]
-script = ExtResource("2_test")
-
-[node name="LeftOverlay" parent="Split/LeftContainer" index="1"]
-layout_mode = 2
-
-[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" index="0"]
+[node name="Split" type="HBoxContainer" parent="."]
 layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
 
-[node name="RightOverlay" parent="Split/RightContainer" index="1"]
+[node name="LeftContainer" type="SubViewportContainer" parent="Split"]
 layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
 
-[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" index="0"]
+[node name="LeftViewport" type="SubViewport" parent="Split/LeftContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(574, 648)
+render_target_update_mode = 4
+
+[node name="World" parent="Split/LeftContainer/LeftViewport" instance=ExtResource("2_world")]
+
+[node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World" unique_id=1977355397]
+script = ExtResource("6_test")
+
+[node name="LeftOverlay" type="Control" parent="Split/LeftContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" instance=ExtResource("5_menu")]
+team_id = 1
+input_prefix = "p1"
+
+[node name="Camera1" type="Camera2D" parent="Split/LeftContainer/LeftViewport" node_paths=PackedStringArray("target", "field")]
+zoom = Vector2(0.5, 0.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+script = ExtResource("3_camera")
+target = NodePath("../World/Player1")
+field = NodePath("../World/Field")
+
+[node name="RightContainer" type="SubViewportContainer" parent="Split"]
+layout_mode = 2
+size_flags_horizontal = 3
+stretch = true
+
+[node name="RightViewport" type="SubViewport" parent="Split/RightContainer"]
+unique_name_in_owner = true
+handle_input_locally = false
+size = Vector2i(574, 648)
+render_target_update_mode = 4
+
+[node name="RightOverlay" type="Control" parent="Split/RightContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" instance=ExtResource("5_menu")]
+team_id = 2
+input_prefix = "p2"
+
+[node name="Camera2" type="Camera2D" parent="Split/RightContainer/RightViewport" node_paths=PackedStringArray("target", "field")]
+zoom = Vector2(0.5, 0.5)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+script = ExtResource("3_camera")
+target = NodePath("../../../LeftContainer/LeftViewport/World/Player2")
+field = NodePath("../../../LeftContainer/LeftViewport/World/Field")
+
+[node name="HudOverlay" parent="." instance=ExtResource("4_hud")]
 layout_mode = 1
