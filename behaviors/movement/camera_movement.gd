@@ -7,7 +7,7 @@ const SAFE_ZONE = preload("res://scripts/fan/safe_zone_geometry.gd")
 @export var move_radius: float = 180.0
 @export var stopping_distance: float = 8.0
 @export var minimum_spacing: float = 120.0
-@export_range(0.0, 1.0, 0.05) var forward_move_chance: float = 0.7
+@export_range(0.0, 1.0, 0.05) var forward_move_chance: float = 1.0
 @export_range(0.0, 1.0, 0.05) var enemy_side_forward_move_chance: float = 0.3
 
 const TARGET_ATTEMPTS := 64
@@ -50,7 +50,9 @@ func _choose_target(fan: Fan) -> void:
 		offset.x *= fan.forward_dir().x * direction
 		var candidate := (fan.global_position + offset).clamp(bounds.position, bounds.end)
 		if _is_target_clear(candidate, neighbors) \
-				and SAFE_ZONE.is_clear(candidate, maxf(1.0, fan.club.hitbox_radius), 8.0, zones):
+				and SAFE_ZONE.is_clear(candidate, maxf(1.0, fan.club.hitbox_radius), 8.0, zones) \
+				and SAFE_ZONE.path_is_clear(fan.global_position, candidate,
+					maxf(1.0, fan.club.hitbox_radius), 8.0, zones):
 			target_position = candidate
 			elapsed = 0.0
 			return

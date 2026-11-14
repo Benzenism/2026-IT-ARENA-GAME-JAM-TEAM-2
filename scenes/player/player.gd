@@ -5,11 +5,15 @@ extends CharacterBody2D
 
 @export var input_prefix: String = "p1"
 @export var speed: float = 400.0
+@export var collision_bounce_speed: float = 450.0
+@export var collision_bounce_deceleration: float = 850.0
 @export var player_texture: Texture2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
 
 const HIT_INVULNERABILITY := 1.0
+const BOUNCE_COOLDOWN := 0.3
+const BOUNCE_INPUT_LOCK := 0.12
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
@@ -28,6 +32,10 @@ var own_stage_center := Vector2.ZERO
 var own_stage_radius := 220.0
 var slow_remaining: float = 0.0
 var slow_multiplier: float = 1.0
+var movement_velocity := Vector2.ZERO
+var bounce_velocity := Vector2.ZERO
+var bounce_cooldown := 0.0
+var bounce_input_lock := 0.0
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _baton_sprite: Sprite2D = $BatonSprite
@@ -41,13 +49,15 @@ func _ready() -> void:
 	spawn_position = global_position
 	respawn_timer = Timer.new()
 	respawn_timer.one_shot = true
-	respawn_timer.wait_time = 3.0
+	respawn_timer.wait_time = 2.0
 	respawn_timer.timeout.connect(respawn)
 	add_child(respawn_timer)
 
 
 func _physics_process(delta: float) -> void:
 	invulnerability = maxf(0.0, invulnerability - delta)
+	bounce_cooldown = maxf(0.0, bounce_cooldown - delta)
+	bounce_input_lock = maxf(0.0, bounce_input_lock - delta)
 	if slow_remaining > 0.0:
 		slow_remaining = maxf(0.0, slow_remaining - delta)
 		if slow_remaining == 0.0:
@@ -58,6 +68,10 @@ func _physics_process(delta: float) -> void:
 	_sprite.modulate = display_color
 	if not is_combat_active():
 		return
+	if movement_locked:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
 	# get_vector는 입력 벡터 길이를 최대 1로 제한함.
 	# 그래서 대각선(→+↓)이어도 (0.707, 0.707)이 되어 속도가 빨라지지 않음.
 	var direction := Input.get_vector(
@@ -66,18 +80,40 @@ func _physics_process(delta: float) -> void:
 		input_prefix + "_up",
 		input_prefix + "_down"
 	)
-	velocity = direction * speed * (0.8 if carried_club != null else 1.0) * slow_multiplier
-	if movement_locked:
-		velocity = Vector2.ZERO
-		move_and_slide()
-		return
+	var max_speed := maxf(0.0, speed * (0.8 if carried_club != null else 1.0) * slow_multiplier)
+	movement_velocity = direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
+	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
+	velocity = movement_velocity + bounce_velocity
 	move_and_slide()
-	if carried_club != null:
-		for i in get_slide_collision_count():
-			var other := get_slide_collision(i).get_collider()
-			if other is IdolPlayer and other.team_id != team_id:
-				drop_carried_baton()
-				break
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var other := collision.get_collider() as IdolPlayer
+		if other == null or not other.is_combat_active():
+			continue
+		if other.team_id != team_id:
+			drop_carried_baton()
+			other.drop_carried_baton()
+		if bounce_cooldown <= 0.0 and other.bounce_cooldown <= 0.0:
+			var away := collision.get_normal().normalized()
+			if away.is_zero_approx():
+				away = other.global_position.direction_to(global_position)
+			if away.is_zero_approx():
+				away = Vector2.LEFT if team_id == 1 else Vector2.RIGHT
+			_start_bounce(away)
+			other._start_bounce(-away)
+		break
+
+
+func _start_bounce(away: Vector2) -> void:
+	bounce_cooldown = BOUNCE_COOLDOWN
+	if movement_locked or not is_combat_active():
+		return
+	var into_collision := movement_velocity.dot(away)
+	if into_collision < 0.0:
+		movement_velocity -= away * into_collision
+	bounce_velocity = away * maxf(0.0, collision_bounce_speed)
+	bounce_input_lock = BOUNCE_INPUT_LOCK
+	velocity = movement_velocity + bounce_velocity
 
 
 func _process(_delta: float) -> void:
@@ -114,6 +150,9 @@ func set_own_stage(center: Vector2, radius: float) -> void:
 func set_movement_locked(locked: bool) -> void:
 	movement_locked = locked
 	if locked:
+		movement_velocity = Vector2.ZERO
+		bounce_velocity = Vector2.ZERO
+		bounce_input_lock = 0.0
 		velocity = Vector2.ZERO
 
 
@@ -162,7 +201,7 @@ func respawn() -> void:
 	global_position = spawn_position
 	velocity = Vector2.ZERO
 	hp = max_hp
-	invulnerability = 2.0
+	invulnerability = 0.5
 	_sprite.visible = true
 	set_movement_locked(false)
 	slow_remaining = 0.0

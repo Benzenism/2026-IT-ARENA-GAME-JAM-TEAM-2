@@ -40,3 +40,25 @@ static func is_clear(point: Vector2, body_radius: float, margin: float,
 		if point.distance_squared_to(collision.global_position) < clearance * clearance:
 			return false
 	return true
+
+
+static func path_is_clear(start: Vector2, end: Vector2, body_radius: float, margin: float,
+		zones: Array[CollisionShape2D]) -> bool:
+	var travel := end - start
+	var length_squared := travel.length_squared()
+	if length_squared <= 0.0001:
+		return is_clear(end, body_radius, margin, zones)
+	for collision in zones:
+		if not is_instance_valid(collision):
+			continue
+		var clearance := radius(collision) + body_radius + margin
+		var offset := start - collision.global_position
+		if offset.length_squared() < clearance * clearance:
+			# Allow an outward move when a fan starts inside the extra margin.
+			if offset.dot(travel) <= 0.0:
+				return false
+			continue
+		var fraction := clampf(-offset.dot(travel) / length_squared, 0.0, 1.0)
+		if (offset + travel * fraction).length_squared() < clearance * clearance:
+			return false
+	return true
