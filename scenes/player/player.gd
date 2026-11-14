@@ -5,10 +5,8 @@ extends CharacterBody2D
 
 @export var input_prefix: String = "p1"
 @export var speed: float = 400.0
-@export var acceleration: float = 2400.0
-@export var deceleration: float = 1600.0
-@export var collision_bounce_speed: float = 280.0
-@export var collision_bounce_deceleration: float = 1200.0
+@export var collision_bounce_speed: float = 450.0
+@export var collision_bounce_deceleration: float = 850.0
 @export var player_texture: Texture2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
@@ -34,7 +32,7 @@ var own_stage_center := Vector2.ZERO
 var own_stage_radius := 220.0
 var slow_remaining: float = 0.0
 var slow_multiplier: float = 1.0
-var glide_velocity := Vector2.ZERO
+var movement_velocity := Vector2.ZERO
 var bounce_velocity := Vector2.ZERO
 var bounce_cooldown := 0.0
 var bounce_input_lock := 0.0
@@ -83,11 +81,9 @@ func _physics_process(delta: float) -> void:
 		input_prefix + "_down"
 	)
 	var max_speed := maxf(0.0, speed * (0.8 if carried_club != null else 1.0) * slow_multiplier)
-	var target_velocity := direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
-	var rate := acceleration if not direction.is_zero_approx() and bounce_input_lock <= 0.0 else deceleration
-	glide_velocity = glide_velocity.move_toward(target_velocity, maxf(0.0, rate) * delta).limit_length(max_speed)
+	movement_velocity = direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
 	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
-	velocity = glide_velocity + bounce_velocity
+	velocity = movement_velocity + bounce_velocity
 	move_and_slide()
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
@@ -112,12 +108,12 @@ func _start_bounce(away: Vector2) -> void:
 	bounce_cooldown = BOUNCE_COOLDOWN
 	if movement_locked or not is_combat_active():
 		return
-	var into_collision := glide_velocity.dot(away)
+	var into_collision := movement_velocity.dot(away)
 	if into_collision < 0.0:
-		glide_velocity -= away * into_collision
+		movement_velocity -= away * into_collision
 	bounce_velocity = away * maxf(0.0, collision_bounce_speed)
 	bounce_input_lock = BOUNCE_INPUT_LOCK
-	velocity = glide_velocity + bounce_velocity
+	velocity = movement_velocity + bounce_velocity
 
 
 func _process(_delta: float) -> void:
@@ -154,7 +150,7 @@ func set_own_stage(center: Vector2, radius: float) -> void:
 func set_movement_locked(locked: bool) -> void:
 	movement_locked = locked
 	if locked:
-		glide_velocity = Vector2.ZERO
+		movement_velocity = Vector2.ZERO
 		bounce_velocity = Vector2.ZERO
 		bounce_input_lock = 0.0
 		velocity = Vector2.ZERO

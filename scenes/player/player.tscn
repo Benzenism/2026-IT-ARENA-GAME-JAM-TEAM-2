@@ -3,12 +3,13 @@
 [ext_resource type="Script" uid="uid://bxnu7vlcnowy4" path="res://scenes/player/player.gd" id="1_script"]
 [ext_resource type="Texture2D" uid="uid://dxpocgxp4upqb" path="res://sprites/player1_sprite.png" id="2_dovo2"]
 
-[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
-size = Vector2(96, 96)
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 48.0
 
 [node name="Player" type="CharacterBody2D" unique_id=2006598082]
 motion_mode = 1
 script = ExtResource("1_script")
+player_texture = ExtResource("2_dovo2")
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2004680724]
 texture = ExtResource("2_dovo2")
@@ -19,4 +20,4 @@ position = Vector2(0, -56)
 scale = Vector2(0.5, 0.5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=487623974]
-shape = SubResource("RectangleShape2D_body")
+shape = SubResource("CircleShape2D_body")
