@@ -41,7 +41,7 @@ func _ready() -> void:
 	spawn_position = global_position
 	respawn_timer = Timer.new()
 	respawn_timer.one_shot = true
-	respawn_timer.wait_time = 3.0
+	respawn_timer.wait_time = 2.0
 	respawn_timer.timeout.connect(respawn)
 	add_child(respawn_timer)
 
@@ -162,7 +162,7 @@ func respawn() -> void:
 	global_position = spawn_position
 	velocity = Vector2.ZERO
 	hp = max_hp
-	invulnerability = 2.0
+	invulnerability = 0.5
 	_sprite.visible = true
 	set_movement_locked(false)
 	slow_remaining = 0.0
