@@ -9,7 +9,7 @@
 [resource]
 script = ExtResource("1_data")
 club_id = &"vertical"
-display_name = "상하팬"
+display_name = "떼창단"
 description = "전방으로 이동하며 2초마다 위아래로 탄환을 한 발씩 발사합니다."
 sprite_texture = ExtResource("5_sprite")
 population_cost = 2
