@@ -4,7 +4,7 @@ extends CharacterBody2D
 ## "p1" → WASD, "p2" → 방향키 (Project Settings > Input Map 참고)
 
 @export var input_prefix: String = "p1"
-@export var speed: float = 300.0
+@export var speed: float = 400.0
 @export var player_texture: Texture2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
