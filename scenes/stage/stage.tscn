@@ -1,0 +1,15 @@
+[gd_scene format=3 uid="uid://dqyhu7siad6iw"]
+
+[ext_resource type="Script" uid="uid://3laj1gmvy7tr" path="res://scenes/stage/stage.gd" id="1"]
+
+[sub_resource type="CircleShape2D" id="StageShape"]
+radius = 110.0
+
+[node name="Stage" type="Area2D" unique_id=631044211]
+collision_layer = 0
+script = ExtResource("1")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1027212137]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1619600438]
+shape = SubResource("StageShape")

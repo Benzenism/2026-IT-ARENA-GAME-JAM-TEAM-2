@@ -64,14 +64,14 @@ p2_down={
 ]
 }
 
-[physics]
-
-3d/physics_engine="Jolt Physics"
-
 [layer_names]
 
 2d_physics/layer_1="Players"
 2d_physics/layer_2="Fans"
+
+[physics]
+
+3d/physics_engine="Jolt Physics"
 
 [rendering]
 

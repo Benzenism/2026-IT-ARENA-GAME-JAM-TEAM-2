@@ -1,3 +1,4 @@
+class_name IdolPlayer
 extends CharacterBody2D
 ## 탑다운 2D 플레이어. input_prefix로 어떤 키 세트를 쓸지 정함.
 ## "p1" → WASD, "p2" → 방향키 (Project Settings > Input Map 참고)
@@ -10,12 +11,19 @@ extends CharacterBody2D
 
 signal health_changed(current_hp: int, maximum_hp: int)
 signal respawned
+signal baton_dropped(player: IdolPlayer, club: FanClubData, position: Vector2)
 
 var hp: int
 var spawn_position: Vector2
 var invulnerability: float = 0.0
+var movement_locked: bool = false
+var carried_club: FanClubData
+var respawn_timer: Timer
+var own_stage_center := Vector2.ZERO
+var own_stage_radius := 220.0
 
 @onready var _sprite: Sprite2D = $Sprite2D
+@onready var _baton_sprite: Sprite2D = $BatonSprite
 
 
 func _ready() -> void:
@@ -23,10 +31,17 @@ func _ready() -> void:
 	_sprite.modulate = color
 	hp = max_hp
 	spawn_position = global_position
+	respawn_timer = Timer.new()
+	respawn_timer.one_shot = true
+	respawn_timer.wait_time = 3.0
+	respawn_timer.timeout.connect(respawn)
+	add_child(respawn_timer)
 
 
 func _physics_process(delta: float) -> void:
 	invulnerability = maxf(0.0, invulnerability - delta)
+	if not is_combat_active():
+		return
 	# get_vector는 입력 벡터 길이를 최대 1로 제한함.
 	# 그래서 대각선(→+↓)이어도 (0.707, 0.707)이 되어 속도가 빨라지지 않음.
 	var direction := Input.get_vector(
@@ -35,8 +50,25 @@ func _physics_process(delta: float) -> void:
 		input_prefix + "_up",
 		input_prefix + "_down"
 	)
-	velocity = direction * speed
+	velocity = direction * speed * (0.8 if carried_club != null else 1.0)
+	if movement_locked:
+		velocity = Vector2.ZERO
+		move_and_slide()
+		return
 	move_and_slide()
+	if carried_club != null:
+		for i in get_slide_collision_count():
+			var other := get_slide_collision(i).get_collider()
+			if other is IdolPlayer and other.team_id != team_id:
+				drop_carried_baton()
+				break
+
+
+func _process(_delta: float) -> void:
+	if not is_combat_active():
+		_sprite.visible = false
+		return
+	_sprite.visible = invulnerability <= 0.0 or fmod(invulnerability * 10.0, 2.0) > 1.0
 
 
 func _draw() -> void:
@@ -50,21 +82,60 @@ func is_combat_active() -> bool:
 	return hp > 0
 
 
+func is_damageable() -> bool:
+	return global_position.distance_to(own_stage_center) > own_stage_radius
+
+
+func set_own_stage(center: Vector2, radius: float) -> void:
+	own_stage_center = center
+	own_stage_radius = radius
+
+
+func set_movement_locked(locked: bool) -> void:
+	movement_locked = locked
+	if locked:
+		velocity = Vector2.ZERO
+
+
+func start_carrying(club: FanClubData) -> void:
+	carried_club = club
+	_baton_sprite.texture = club.sprite_texture
+	_baton_sprite.visible = true
+
+
+func finish_carrying() -> FanClubData:
+	var club := carried_club
+	carried_club = null
+	_baton_sprite.visible = false
+	return club
+
+
+func drop_carried_baton() -> void:
+	if carried_club == null:
+		return
+	var club := finish_carrying()
+	baton_dropped.emit(self, club, global_position)
+
+
 func take_damage(amount: int) -> void:
 	if amount <= 0 or invulnerability > 0 or not is_combat_active():
 		return
+	drop_carried_baton()
 	hp = maxi(0, hp - amount)
 	queue_redraw()
 	health_changed.emit(hp, max_hp)
 	if hp == 0:
-		respawn()
+		set_movement_locked(true)
+		respawn_timer.start()
 
 
 func respawn() -> void:
 	global_position = spawn_position
 	velocity = Vector2.ZERO
 	hp = max_hp
-	invulnerability = 1.0
+	invulnerability = 2.0
+	_sprite.visible = true
+	set_movement_locked(false)
 	reset_physics_interpolation()
 	queue_redraw()
 	health_changed.emit(hp, max_hp)

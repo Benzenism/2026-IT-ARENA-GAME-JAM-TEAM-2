@@ -33,6 +33,8 @@ func _on_body_entered(body: Node2D) -> void:
 		return
 	if body.has_method("is_combat_active") and not body.is_combat_active():
 		return
+	if body.has_method("is_damageable") and not body.is_damageable():
+		return
 	consumed = true
 	body.take_damage(damage)
 	queue_free()

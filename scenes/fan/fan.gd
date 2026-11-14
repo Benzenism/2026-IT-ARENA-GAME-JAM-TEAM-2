@@ -81,6 +81,12 @@ func forward_dir() -> Vector2:
 	return Vector2.RIGHT if team_id == 1 else Vector2.LEFT
 
 
+func change_team(new_team_id: int, new_enemy_player: CharacterBody2D) -> void:
+	team_id = new_team_id
+	enemy_player = new_enemy_player
+	queue_redraw()
+
+
 func has_active_target() -> bool:
 	return is_instance_valid(enemy_player) and enemy_player.is_inside_tree() \
 		and (not enemy_player.has_method("is_combat_active") or enemy_player.is_combat_active())

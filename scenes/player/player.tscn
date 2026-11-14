@@ -13,5 +13,10 @@ script = ExtResource("1_script")
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_icon")
 
+[node name="BatonSprite" type="Sprite2D" parent="."]
+position = Vector2(0, -56)
+scale = Vector2(0.35, 0.35)
+visible = false
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("RectangleShape2D_body")

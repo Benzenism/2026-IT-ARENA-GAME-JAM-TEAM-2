@@ -9,9 +9,10 @@ const FAN_SCENE: PackedScene = preload("res://scenes/fan/fan.tscn")
 @export var team_id: int = 1
 @export var population_limit: int = 16
 @export var owned_clubs: Array[FanClubData] = []
-@export var spawn_interval: float = 1.15
+@export var spawn_interval: float = 1.5
 
 var used_population: int = 0
+var club_population: Dictionary = {}
 var next_spawn_index: int = 0
 var spawn_count: int = 0
 var enemy_player: CharacterBody2D
@@ -31,19 +32,37 @@ func _ready() -> void:
 
 
 func try_spawn() -> Fan:
+	_sync_population()
 	var count := owned_clubs.size()
 	if count == 0:
 		return null
+	var selected_index := -1
+	var selected_population := INF
 	for offset in range(count):
 		var index := (next_spawn_index + offset) % count
 		var club := owned_clubs[index]
 		if club == null or used_population + club.population_cost > population_limit:
 			continue
-		var fan := spawn_fan(club)
-		if fan != null:
-			next_spawn_index = (index + 1) % count
-		return fan
-	return null
+		var current_population: int = club_population.get(club, 0)
+		if current_population < selected_population:
+			selected_index = index
+			selected_population = current_population
+	if selected_index < 0:
+		return null
+	var fan := spawn_fan(owned_clubs[selected_index])
+	if fan != null:
+		next_spawn_index = (selected_index + 1) % count
+	return fan
+
+
+func _sync_population() -> void:
+	used_population = 0
+	club_population.clear()
+	for fan: Fan in get_tree().get_nodes_in_group("fans"):
+		if is_instance_valid(fan) and fan.team_id == team_id and fan.is_combat_active():
+			used_population += fan.club.population_cost
+			club_population[fan.club] = \
+				club_population.get(fan.club, 0) + fan.club.population_cost
 
 
 func spawn_fan(club: FanClubData) -> Fan:
@@ -63,7 +82,6 @@ func spawn_fan(club: FanClubData) -> Fan:
 	fan.position = fan_container.to_local(Vector2(spawn_x, spawn_y))
 	fan.despawned.connect(_on_fan_despawned)
 	fan.shoot_requested.connect(projectile_spawner.request_shot)
-	# Reserve the cost before entering the tree, where callbacks may execute.
 	used_population += club.population_cost
 	spawn_count += 1
 	fan_container.add_child(fan)

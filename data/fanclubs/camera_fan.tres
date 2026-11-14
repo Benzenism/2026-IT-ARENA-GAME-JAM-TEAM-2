@@ -15,6 +15,7 @@ sprite_texture = ExtResource("5_camera")
 move_speed = 90.0
 population_cost = 2
 attack_interval = 5.0
+projectile_lifetime = 3.5
 movement_scene = ExtResource("2")
 attack_scene = ExtResource("3")
 projectile_scene = ExtResource("4")

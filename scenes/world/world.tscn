@@ -1,8 +1,11 @@
-[gd_scene format=3 uid="uid://dfmhvwxcojvsj"]
+[gd_scene load_steps=7 format=3 uid="uid://dfmhvwxcojvsj"]
 
 [ext_resource type="Script" uid="uid://brlt0r71r5vwe" path="res://scenes/world/field.gd" id="1_field"]
 [ext_resource type="Texture2D" uid="uid://dlcgra3mfc8aa" path="res://sprites/bg.png" id="2_1fp7r"]
 [ext_resource type="PackedScene" path="res://scenes/player/player.tscn" id="2_player"]
+[ext_resource type="PackedScene" path="res://scenes/stage/stage.tscn" id="3_stage"]
+[ext_resource type="Texture2D" path="res://sprites/stage/stage1.png" id="4_stage1"]
+[ext_resource type="Texture2D" path="res://sprites/stage/stage2.png" id="5_stage2"]
 
 [node name="World" type="Node2D" unique_id=557916526]
 
@@ -12,6 +15,16 @@ script = ExtResource("1_field")
 [node name="Background" type="Sprite2D" parent="Field" unique_id=1326201674]
 scale = Vector2(1.7, 1.7)
 texture = ExtResource("2_1fp7r")
+
+[node name="Stage1" parent="." instance=ExtResource("3_stage")]
+position = Vector2(-900, 0)
+team_id = 1
+stage_texture = ExtResource("4_stage1")
+
+[node name="Stage2" parent="." instance=ExtResource("3_stage")]
+position = Vector2(900, 0)
+team_id = 2
+stage_texture = ExtResource("5_stage2")
 
 [node name="Player1" parent="." unique_id=2095809743 instance=ExtResource("2_player")]
 position = Vector2(-600, 0)
