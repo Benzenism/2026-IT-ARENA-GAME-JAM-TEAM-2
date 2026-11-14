@@ -135,6 +135,7 @@ func _on_baton_dropped(idol: IdolPlayer, club: FanClubData, position: Vector2) -
 	var source_team_id: int = carrying_sources.get(idol, 3 - idol.team_id)
 	carrying_sources.erase(idol)
 	var baton := BATON_SCENE.instantiate() as CaptureBaton
+	baton.dropper = idol
 	baton.position = position
 	baton.picked_up.connect(_on_baton_picked_up)
 	baton.returned.connect(_on_baton_returned)

@@ -8,6 +8,8 @@ var club: FanClubData
 var source_team_id: int
 var target_team_id: int
 var lifetime: float = 5.0
+var dropper: IdolPlayer
+var dropper_pickup_block: float = 0.25
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var return_timer: Timer = $ReturnTimer
@@ -26,10 +28,16 @@ func _ready() -> void:
 	return_timer.timeout.connect(_on_return_timer_timeout)
 
 
+func _physics_process(delta: float) -> void:
+	dropper_pickup_block = maxf(0.0, dropper_pickup_block - delta)
+
+
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("idols"):
 		return
 	var idol := body as IdolPlayer
+	if idol == dropper and dropper_pickup_block > 0.0:
+		return
 	if idol.team_id == target_team_id:
 		picked_up.emit(self, idol)
 	elif idol.team_id == source_team_id:
