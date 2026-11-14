@@ -16,7 +16,7 @@ texture = ExtResource("2_dovo2")
 [node name="BatonSprite" type="Sprite2D" parent="." unique_id=648356014]
 visible = false
 position = Vector2(0, -56)
-scale = Vector2(0.35, 0.35)
+scale = Vector2(0.5, 0.5)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=487623974]
 shape = SubResource("RectangleShape2D_body")
