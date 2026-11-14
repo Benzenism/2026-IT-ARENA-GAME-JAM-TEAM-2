@@ -72,7 +72,7 @@ func _ready() -> void:
 		attack_timer.start(attack_timer.wait_time + maxf(0.0, first_attack_offset))
 
 func _process(_delta: float) -> void:
-	if is_charging:
+	if is_charging and (hit_flash_tween == null or not hit_flash_tween.is_running()):
 		var progress := 1.0 - (charge_timer.time_left / charge_timer.wait_time)
 		# A warm flash remains visible even when the original sprite is white.
 		var warning_color := Color(1.0, 0.68, 0.3, charge_base_color.a)
@@ -152,7 +152,7 @@ func _on_attack_timeout() -> void:
 		return
 	attack.prepare(self)
 	is_charging = true
-	charge_base_color = sprite.modulate
+	charge_base_color = hit_flash_base_color if hit_flash_tween != null and hit_flash_tween.is_running() else sprite.modulate
 	charge_timer.start()
 	queue_redraw()
 
@@ -161,7 +161,8 @@ func _on_charge_finished() -> void:
 	if not is_combat_active():
 		return
 	is_charging = false
-	sprite.modulate = charge_base_color
+	if hit_flash_tween == null or not hit_flash_tween.is_running():
+		sprite.modulate = charge_base_color
 	attack.fire(self)
 	queue_redraw()
 	attack_timer.start(maxf(0.05, club.attack_interval - charge_timer.wait_time))
@@ -191,7 +192,7 @@ func _show_hit_flash() -> void:
 	if hit_flash_tween != null and hit_flash_tween.is_running():
 		hit_flash_tween.kill()
 	else:
-		hit_flash_base_color = sprite.modulate
+		hit_flash_base_color = charge_base_color if is_charging else sprite.modulate
 	sprite.modulate = Color(hit_flash_base_color.r, hit_flash_base_color.g * 0.15,
 		hit_flash_base_color.b * 0.15, hit_flash_base_color.a)
 	hit_flash_tween = create_tween()
@@ -222,6 +223,8 @@ func despawn() -> void:
 	is_despawning = true
 	attack_timer.stop()
 	charge_timer.stop()
+	is_charging = false
+	queue_redraw()
 	despawned.emit(club.population_cost)
 	if has_died and club.hit_flash_duration > 0.0:
 		if hit_flash_tween != null and hit_flash_tween.is_running():

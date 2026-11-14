@@ -9,7 +9,7 @@ extends Resource
 
 @export_group("Visuals")
 @export var sprite_texture: Texture2D
-@export_range(0.0, 2.0, 0.05) var hit_flash_duration: float = 0.0
+@export_range(0.0, 2.0, 0.05) var hit_flash_duration: float = 0.25
 
 @export_group("Stats")
 @export_range(1, 100) var max_hp: int = 3
