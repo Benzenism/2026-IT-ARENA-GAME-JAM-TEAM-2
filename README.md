@@ -21,11 +21,12 @@ P1은 WASD, P2는 방향키로 이동합니다. 양 진영에서 팬이 자동 �
 ```text
 data/fanclubs/*.tres          팬클럽 데이터, 기본 수치와 행동 조합
 scenes/fan/fan.tscn           두 종류가 공유하는 팬 씬
-scripts/fan/fan.gd           개별 HP, 이동 실행, 발사 요청, 사망/이탈
-behaviors/movement/*.tscn    직진 / 상대 추적
-behaviors/attack/*.tscn      전방 발사 / 조준 발사
+scenes/fan/fan.gd            개별 HP, 이동 실행, 발사 요청, 사망/이탈
+behaviors/movement/          직진 씬과 씬에 붙는 이동 스크립트
+behaviors/attack/            전방/조준 발사 씬과 씬에 붙는 공격 스크립트
 scripts/team/               라운드 로빈 생성, 인구 예약 및 반환
-scripts/projectile/         탄환 생성, 진영 판정, 피해, 수명
+scenes/projectile/          탄환 씬과 탄환 스크립트
+scripts/projectile/         탄환 생성, 진영 판정, 피해, 수명 관리
 scripts/ability/            향후 특수 능력을 위한 베이스
 ```
 
