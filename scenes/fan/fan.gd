@@ -69,6 +69,14 @@ func _physics_process(_delta: float) -> void:
 		exit_map()
 
 
+func _draw() -> void:
+	var health_color := Color("f16f8a") if team_id == 1 else Color("69a9ff")
+	for i in range(club.max_hp):
+		var offset := (i - (club.max_hp - 1) * 0.5) * 6.0
+		draw_circle(Vector2(offset, 30), 1.8,
+			health_color if i < hp else Color("35415b"))
+
+
 func forward_dir() -> Vector2:
 	return Vector2.RIGHT if team_id == 1 else Vector2.LEFT
 
@@ -111,6 +119,7 @@ func take_damage(amount: int) -> void:
 	if not is_combat_active() or amount <= 0:
 		return
 	hp = maxi(0, hp - amount)
+	queue_redraw()
 	if hp == 0:
 		die()
 
@@ -118,6 +127,7 @@ func take_damage(amount: int) -> void:
 func heal(amount: int) -> void:
 	if is_combat_active() and amount > 0:
 		hp = mini(club.max_hp, hp + amount)
+		queue_redraw()
 
 
 func die() -> void:

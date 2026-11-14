@@ -39,6 +39,13 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 
+func _draw() -> void:
+	for i in range(max_hp):
+		var offset := (i - (max_hp - 1) * 0.5) * 8.0
+		draw_circle(Vector2(offset, 62), 2.4,
+			color if i < hp else Color("35415b"))
+
+
 func is_combat_active() -> bool:
 	return hp > 0
 
@@ -47,6 +54,7 @@ func take_damage(amount: int) -> void:
 	if amount <= 0 or invulnerability > 0 or not is_combat_active():
 		return
 	hp = maxi(0, hp - amount)
+	queue_redraw()
 	health_changed.emit(hp, max_hp)
 	if hp == 0:
 		respawn()
@@ -58,5 +66,6 @@ func respawn() -> void:
 	hp = max_hp
 	invulnerability = 1.0
 	reset_physics_interpolation()
+	queue_redraw()
 	health_changed.emit(hp, max_hp)
 	respawned.emit()
