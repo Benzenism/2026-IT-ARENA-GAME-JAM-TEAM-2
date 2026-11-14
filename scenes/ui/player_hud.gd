@@ -10,6 +10,11 @@ const CHIP_SIZE := 46.0
 const CHIP_STEP := 59.0 # 54 슬롯 + 5 간격 (아이콘 46은 슬롯 가운데)
 ## 초상화(+뒤 오라)를 디자인 위치보다 화면 가운데 쪽으로 옮기는 양 (디자인 px)
 const PORTRAIT_INSET := 12.0
+## 초상화를 패널(230) 위로 올리는 양. 초상화 아래는 화면 끝(패널 바닥)에 붙어 있고
+## 높이 = 230 + 이 값. 일러스트 파일(480×777)은 이 비율(210×340)로 잘라 둔 것 —
+## 값을 바꾸면 일러스트도 같은 비율로 다시 잘라야 늘어나 보이지 않음.
+const PORTRAIT_RAISE := 110.0
+const PORTRAIT_WIDTH := 210.0
 const TEX := {
 	1: {
 		"portrait": preload("res://sprites/ui/hud/portrait_p1.png"),
@@ -38,7 +43,7 @@ const SPARKLE_8 := preload("res://sprites/ui/hud/sparkle_8.svg")
 		team_id = value
 		if is_inside_tree():
 			_build()
-## 비워두면 P1 = Uli, P2 = Hana
+## 비워두면 P1 = Uri, P2 = Hana
 @export var player_name: String = "":
 	set(value):
 		player_name = value
@@ -111,7 +116,7 @@ func _shade() -> Color:
 func _display_name() -> String:
 	if player_name != "":
 		return player_name
-	return "Hana" if _is_p2() else "Uli"
+	return "Hana" if _is_p2() else "Uri"
 
 
 ## P1 기준 x 좌표를 P2에서는 좌우 반전
@@ -140,7 +145,8 @@ func _build() -> void:
 	_panel = Control.new()
 	_panel.name = "Panel"
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_panel.clip_contents = true
+	# 초상화 머리가 패널 위로 나올 수 있게 클립하지 않음 (패널 아래는 어차피 화면 끝)
+	_panel.clip_contents = false
 	_panel.anchor_top = 1.0
 	_panel.anchor_bottom = 1.0
 	_panel.offset_top = -PANEL_SIZE.y
@@ -162,7 +168,8 @@ func _build() -> void:
 
 	# 일러스트는 그려진 방향 그대로 (좌우 반전 없음)
 	_portrait = HudUi.texture_rect(_tex("portrait"),
-		Vector2(_mx(-8 + PORTRAIT_INSET, 210), 0), Vector2(210, 280))
+		Vector2(_mx(-8 + PORTRAIT_INSET, PORTRAIT_WIDTH), -PORTRAIT_RAISE),
+		Vector2(PORTRAIT_WIDTH, PANEL_SIZE.y + PORTRAIT_RAISE))
 	_panel.add_child(_portrait)
 	var hurt_path: String = HURT_PORTRAIT_PATH[2 if p2 else 1]
 	_hurt_texture = load(hurt_path) as Texture2D if ResourceLoader.exists(hurt_path) else null
