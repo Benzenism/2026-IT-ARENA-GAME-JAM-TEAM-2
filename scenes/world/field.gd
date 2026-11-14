@@ -10,6 +10,7 @@ const WALL_THICKNESS := 200.0
 	set(value):
 		size = value
 		queue_redraw()
+@export var movement_margin: float = 150.0
 @export var cell_size: float = 200.0:
 	set(value):
 		cell_size = maxf(value, 8.0)
@@ -48,14 +49,16 @@ func _draw() -> void:
 func _build_walls() -> void:
 	var body := StaticBody2D.new()
 	body.name = "Walls"
+	body.collision_layer = 1
 	var half := size / 2.0
 	var t := WALL_THICKNESS
+	var margin := maxf(0.0, movement_margin)
 	# [중심 위치, 크기] — 필드 바깥쪽에 붙는 상/하/좌/우 벽
 	var walls := [
-		[Vector2(0, -half.y - t / 2), Vector2(size.x + t * 2, t)],
-		[Vector2(0, half.y + t / 2), Vector2(size.x + t * 2, t)],
-		[Vector2(-half.x - t / 2, 0), Vector2(t, size.y)],
-		[Vector2(half.x + t / 2, 0), Vector2(t, size.y)],
+		[Vector2(0, -half.y + margin - t / 2), Vector2(size.x + t * 2, t)],
+		[Vector2(0, half.y - margin + t / 2), Vector2(size.x + t * 2, t)],
+		[Vector2(-half.x + margin - t / 2, 0), Vector2(t, size.y)],
+		[Vector2(half.x - margin + t / 2, 0), Vector2(t, size.y)],
 	]
 	for w in walls:
 		var shape := RectangleShape2D.new()

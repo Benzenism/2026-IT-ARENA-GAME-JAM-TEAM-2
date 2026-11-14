@@ -15,6 +15,14 @@ const HIT_INVULNERABILITY := 1.0
 const BOUNCE_COOLDOWN := 0.3
 const BOUNCE_INPUT_LOCK := 0.12
 const DIAGONAL_SPEED_MULTIPLIER := 1.2
+const BURST_RADIUS := 300.0
+const BURST_VISUAL_DURATION := 0.2
+const BURST_PLAYER_KNOCKBACK_DISTANCE := 250.0
+const BURST_FAN_KNOCKBACK_DISTANCE := 350.0
+const BURST_COOLDOWN := 10.0
+const BURST_KNOCKBACK_DECELERATION := 850.0
+const BURST_RING_RADIUS := 50.0
+const BURST_RING_CENTER := Vector2(0.0, 16.0)
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
@@ -37,6 +45,10 @@ var movement_velocity := Vector2.ZERO
 var bounce_velocity := Vector2.ZERO
 var bounce_cooldown := 0.0
 var bounce_input_lock := 0.0
+var burst_cooldown_remaining := 0.0
+var burst_visual_remaining := 0.0
+var burst_ready_flash_remaining := 0.0
+var facing_direction := Vector2.RIGHT
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _baton_sprite: Sprite2D = $BatonSprite
@@ -47,6 +59,8 @@ func _ready() -> void:
 	assert(player_texture != null, "Assign a player texture before adding an IdolPlayer.")
 	_sprite.texture = player_texture
 	hp = max_hp
+	facing_direction = Vector2.RIGHT if team_id == 1 else Vector2.LEFT
+	_sprite.flip_h = team_id == 1
 	spawn_position = global_position
 	respawn_timer = Timer.new()
 	respawn_timer.one_shot = true
@@ -59,6 +73,12 @@ func _physics_process(delta: float) -> void:
 	invulnerability = maxf(0.0, invulnerability - delta)
 	bounce_cooldown = maxf(0.0, bounce_cooldown - delta)
 	bounce_input_lock = maxf(0.0, bounce_input_lock - delta)
+	var was_cooling_down := burst_cooldown_remaining > 0.0
+	burst_cooldown_remaining = maxf(0.0, burst_cooldown_remaining - delta)
+	if was_cooling_down and is_zero_approx(burst_cooldown_remaining):
+		burst_ready_flash_remaining = 0.35
+	burst_visual_remaining = maxf(0.0, burst_visual_remaining - delta)
+	burst_ready_flash_remaining = maxf(0.0, burst_ready_flash_remaining - delta)
 	if slow_remaining > 0.0:
 		slow_remaining = maxf(0.0, slow_remaining - delta)
 		if slow_remaining == 0.0:
@@ -78,6 +98,10 @@ func _physics_process(delta: float) -> void:
 		Input.get_axis(input_prefix + "_left", input_prefix + "_right"),
 		Input.get_axis(input_prefix + "_up", input_prefix + "_down")
 	).limit_length(DIAGONAL_SPEED_MULTIPLIER)
+	if not direction.is_zero_approx():
+		facing_direction = direction.normalized()
+	if not is_zero_approx(direction.x):
+		_sprite.flip_h = direction.x > 0.0
 	var max_speed := maxf(0.0, speed * (0.8 if carried_club != null else 1.0) * slow_multiplier)
 	movement_velocity = direction * max_speed if bounce_input_lock <= 0.0 else Vector2.ZERO
 	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
@@ -119,9 +143,28 @@ func _process(_delta: float) -> void:
 		_sprite.visible = false
 		return
 	_sprite.visible = invulnerability <= 0.0 or fmod(invulnerability * 10.0, 2.0) > 1.0
+	queue_redraw()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	var key_event := event as InputEventKey
+	if key_event == null or not key_event.pressed or key_event.echo:
+		return
+	if key_event.keycode != KEY_SHIFT and key_event.physical_keycode != KEY_SHIFT:
+		return
+	var expected_location := KEY_LOCATION_LEFT if team_id == 1 else KEY_LOCATION_RIGHT
+	if key_event.location == expected_location:
+		_try_idol_burst()
 
 
 func _draw() -> void:
+	_draw_burst_ring()
+	if burst_visual_remaining > 0.0:
+		var progress := 1.0 - burst_visual_remaining / BURST_VISUAL_DURATION
+		var burst_color := Color(0.45, 0.75, 1.0, 0.8) if team_id == 1 \
+				else Color(1.0, 0.45, 0.75, 0.8)
+		draw_arc(Vector2.ZERO, BURST_RADIUS * (0.75 + progress * 0.25),
+			0.0, TAU, 64, Color(burst_color, burst_color.a * (1.0 - progress)), 5.0, true)
 	for i in range(max_hp):
 		var offset := Vector2((i - (max_hp - 1) * 0.5) * 21.0, 83.0)
 		var points := PackedVector2Array()
@@ -130,6 +173,58 @@ func _draw() -> void:
 		var heart_color := Color("4c8ded") if team_id == 1 else Color("ed4c9a")
 		draw_colored_polygon(points, heart_color if i < hp else Color("414b57"))
 		draw_polyline(points, Color("1b2029"), 1.5, true)
+
+
+func _draw_burst_ring() -> void:
+	var ring_color := Color("478dff") if team_id == 1 else Color("ed4c9a")
+	var ring_alpha := 1.0
+	if burst_cooldown_remaining > 0.0:
+		ring_alpha = 0.75
+	elif burst_ready_flash_remaining > 0.0:
+		ring_alpha = 1.0 + 0.35 * sin(burst_ready_flash_remaining * 24.0)
+	var ring := Color(ring_color, ring_alpha)
+	draw_arc(BURST_RING_CENTER, BURST_RING_RADIUS, 0.0, TAU, 64, Color(ring, 0.25), 3.0, true)
+	if burst_cooldown_remaining > 0.0:
+		var progress := 1.0 - burst_cooldown_remaining / BURST_COOLDOWN
+		draw_arc(BURST_RING_CENTER, BURST_RING_RADIUS, -PI / 2.0,
+			-PI / 2.0 + TAU * progress, 64, ring, 3.0, true)
+	else:
+		draw_arc(BURST_RING_CENTER, BURST_RING_RADIUS, 0.0, TAU, 64, ring, 3.0, true)
+
+
+func _try_idol_burst() -> void:
+	if not is_combat_active() or burst_cooldown_remaining > 0.0:
+		return
+	burst_cooldown_remaining = BURST_COOLDOWN
+	burst_visual_remaining = BURST_VISUAL_DURATION
+	for idol: IdolPlayer in get_tree().get_nodes_in_group("idols"):
+		if idol == self or idol.team_id == team_id or not idol.is_combat_active():
+			continue
+		if global_position.distance_to(idol.global_position) > BURST_RADIUS:
+			continue
+		idol.apply_burst_knockback(_burst_direction_to(idol.global_position),
+				BURST_PLAYER_KNOCKBACK_DISTANCE)
+	for fan: Fan in get_tree().get_nodes_in_group("fans"):
+		if fan.team_id == team_id or not fan.is_combat_active():
+			continue
+		if global_position.distance_to(fan.global_position) > BURST_RADIUS:
+			continue
+		fan.apply_knockback(_burst_direction_to(fan.global_position),
+				BURST_FAN_KNOCKBACK_DISTANCE)
+	queue_redraw()
+
+
+func _burst_direction_to(target_position: Vector2) -> Vector2:
+	var direction := global_position.direction_to(target_position)
+	return -facing_direction if direction.is_zero_approx() else direction
+
+
+func apply_burst_knockback(direction: Vector2, distance: float) -> void:
+	if not is_combat_active() or direction.is_zero_approx() or distance <= 0.0:
+		return
+	var speed := sqrt(2.0 * BURST_KNOCKBACK_DECELERATION * distance)
+	bounce_velocity += direction.normalized() * speed
+	bounce_input_lock = maxf(bounce_input_lock, BOUNCE_INPUT_LOCK)
 
 
 func is_combat_active() -> bool:

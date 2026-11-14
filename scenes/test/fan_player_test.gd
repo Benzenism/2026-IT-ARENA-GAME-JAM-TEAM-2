@@ -70,10 +70,12 @@ func _ready() -> void:
 		team.fan_container = fans
 		team.projectile_spawner = projectiles
 		team.arena_rect = bounds
+		team.spawn_center = stages[i].global_position
 		add_child(team)
 		teams.append(team)
-		team.try_spawn()
-		team.try_spawn()
+		for _attempt in team.population_limit:
+			if team.try_spawn() == null:
+				break
 	add_to_group("game_controller")
 	call_deferred("_connect_ui")
 
@@ -119,11 +121,8 @@ func _on_stage_idol_entered(idol: IdolPlayer, stage: IdolStage) -> void:
 		return
 	if _has_dropped_baton(idol):
 		return
-	var menu := _menu(idol.team_id)
-	if menu == null or menu.active:
-		return
-	idol.set_movement_locked(true)
-	menu.open_menu(defending_team.owned_clubs)
+	var selected_club: FanClubData = defending_team.owned_clubs.pick_random()
+	_on_capture_confirmed(idol.team_id, selected_club)
 
 
 func _has_dropped_baton(idol: IdolPlayer) -> bool:

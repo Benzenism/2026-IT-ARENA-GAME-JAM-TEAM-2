@@ -24,6 +24,7 @@ var has_died: bool = false
 var is_charging: bool = false
 var charge_base_color := Color.WHITE
 var first_attack_offset: float = 0.0
+var knockback_velocity := Vector2.ZERO
 var hit_flash_tween: Tween
 var hit_flash_base_color := Color.WHITE
 
@@ -82,7 +83,10 @@ func _process(_delta: float) -> void:
 func _physics_process(_delta: float) -> void:
 	if is_despawning:
 		return
-	velocity = Vector2.ZERO if is_charging else movement.get_direction(self).limit_length(1.0) * club.move_speed
+	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * _delta)
+	var movement_velocity := Vector2.ZERO if is_charging \
+			else movement.get_direction(self).limit_length(1.0) * club.move_speed
+	velocity = movement_velocity + knockback_velocity
 	move_and_slide()
 	if not arena_rect.grow(24.0).has_point(global_position):
 		exit_map()
@@ -130,6 +134,13 @@ func _telegraph_length(origin: Vector2, direction: Vector2) -> float:
 
 func forward_dir() -> Vector2:
 	return Vector2.RIGHT if team_id == 1 else Vector2.LEFT
+
+
+func apply_knockback(direction: Vector2, distance: float) -> void:
+	if not is_combat_active() or direction.is_zero_approx() or distance <= 0.0:
+		return
+	var speed := sqrt(2.0 * 900.0 * distance)
+	knockback_velocity += direction.normalized() * speed
 
 
 func change_team(new_team_id: int, new_enemy_player: CharacterBody2D) -> void:
