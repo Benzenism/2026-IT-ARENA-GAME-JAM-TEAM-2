@@ -14,10 +14,14 @@ const CHIP_TIGHT_GAP := 8.0
 ## 초상화(+뒤 오라)를 디자인 위치보다 화면 가운데 쪽으로 옮기는 양 (디자인 px)
 const PORTRAIT_INSET := 12.0
 ## 초상화를 패널(230) 위로 올리는 양. 초상화 아래는 화면 끝(패널 바닥)에 붙어 있고
-## 높이 = 230 + 이 값. 일러스트 파일(480×777)은 이 비율(210×340)로 잘라 둔 것 —
-## 값을 바꾸면 일러스트도 같은 비율로 다시 잘라야 늘어나 보이지 않음.
+## 높이 = 230 + 이 값.
 const PORTRAIT_RAISE := 110.0
-const PORTRAIT_WIDTH := 210.0
+## 초상화 파일(800×777)은 원본 일러스트를 가로 전체(1000px)로 잘라 둔 것 — 옆이 잘린
+## 경계선이 생기지 않고, 화면 밖으로 나가는 부분은 자연스럽게 화면 끝에서 잘린다.
+## 크기 350×340 (디자인 px) = 원본 1px당 0.35.
+const PORTRAIT_WIDTH := 350.0
+## 원본 x=0이 놓이는 위치. 얼굴 위치는 예전 좁은 크롭(원본 x=170부터)과 같게 유지.
+const PORTRAIT_LEFT := -8.0 - 170.0 * 0.35
 const TEX := {
 	1: {
 		"portrait": preload("res://sprites/ui/hud/portrait_p1.png"),
@@ -52,8 +56,9 @@ const SPARKLE_8 := preload("res://sprites/ui/hud/sparkle_8.svg")
 		player_name = value
 		if _name_label:
 			_name_label.text = _display_name()
-## 팬클럽 칩 슬롯 수 (게임 전체 팬클럽 수). 게임 중에는 HudOverlay가
-## 두 팀이 가진 팬클럽 수의 합으로 맞춰 준다.
+## 팬클럽 칩 슬롯 수. 한 팀이 가질 수 있는 최대 수(5)로 고정 —
+## 상대가 팬클럽을 하나도 못 가지면 그 순간 경기가 끝나므로 5칸이면 충분하다.
+## 빈 칸 = 5 - 보유 수.
 @export var total_clubs: int = 5:
 	set(value):
 		if value == total_clubs:
@@ -102,11 +107,6 @@ func set_player_state(hp: int, _max_hp: int, clubs: Array[FanClubData],
 	_refresh_chips()
 	_fan_count.text = str(population)
 	_fan_total.text = " / %d" % population_limit
-
-
-## 이 팀이 지금 가진 팬클럽 수
-func owned_club_count() -> int:
-	return _clubs.size()
 
 
 # --- 레이아웃 ----------------------------------------------------------------
@@ -182,7 +182,7 @@ func _build() -> void:
 
 	# 일러스트는 그려진 방향 그대로 (좌우 반전 없음)
 	_portrait = HudUi.texture_rect(_tex("portrait"),
-		Vector2(_mx(-8 + PORTRAIT_INSET, PORTRAIT_WIDTH), -PORTRAIT_RAISE),
+		Vector2(_mx(PORTRAIT_LEFT + PORTRAIT_INSET, PORTRAIT_WIDTH), -PORTRAIT_RAISE),
 		Vector2(PORTRAIT_WIDTH, PANEL_SIZE.y + PORTRAIT_RAISE))
 	_panel.add_child(_portrait)
 	var hurt_path: String = HURT_PORTRAIT_PATH[2 if p2 else 1]
