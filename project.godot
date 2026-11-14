@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="magicalidols"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="uid://5cjkajxy3nmt"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 
@@ -20,6 +20,10 @@ config/icon="res://icon.svg"
 window/size/mode=3
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[gui]
+
+theme/custom_font="uid://bupstxq6y2vba"
 
 [input]
 

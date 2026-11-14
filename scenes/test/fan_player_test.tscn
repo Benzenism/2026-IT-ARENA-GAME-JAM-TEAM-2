@@ -1,15 +1,27 @@
-[gd_scene format=3 uid="uid://u7hid5exxt8d"]
+[gd_scene format=3 uid="uid://5cjkajxy3nmt"]
 
 [ext_resource type="PackedScene" path="res://scenes/main.tscn" id="1_main"]
 [ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="2_test"]
 
 [node name="FanPlayerTest" unique_id=1443702000 instance=ExtResource("1_main")]
 
-[node name="LeftViewport" parent="Split/LeftContainer" index="0"]
-size = Vector2i(718, 900)
-
 [node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World" index="3" unique_id=1977355397]
 script = ExtResource("2_test")
 
-[node name="RightViewport" parent="Split/RightContainer" index="0"]
-size = Vector2i(718, 900)
+[node name="LeftOverlay" parent="Split/LeftContainer" index="1"]
+layout_mode = 2
+
+[node name="Player1Hud" parent="Split/LeftContainer/LeftOverlay" index="0"]
+layout_mode = 1
+
+[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" index="1"]
+layout_mode = 1
+
+[node name="RightOverlay" parent="Split/RightContainer" index="1"]
+layout_mode = 2
+
+[node name="Player2Hud" parent="Split/RightContainer/RightOverlay" index="0"]
+layout_mode = 1
+
+[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" index="1"]
+layout_mode = 1
