@@ -1,7 +1,8 @@
 extends FanAttack
-## A warned, non-damaging circular flash that slows opposing idols.
+## A warned circular flash that damages and slows opposing idols.
 
 @export var radius: float = 200.0
+@export_range(0, 100) var damage: int = 1
 @export_range(0.0, 1.0) var slow_multiplier: float = 0.5
 @export var slow_duration: float = 1.0
 @export_flags_2d_physics var target_mask: int = 1
@@ -28,6 +29,9 @@ func fire(fan: Fan) -> void:
 		if target.get("team_id") == fan.team_id or not target.has_method("apply_slow"):
 			continue
 		target.apply_slow(slow_multiplier, slow_duration)
+		if target.has_method("take_damage") \
+				and (not target.has_method("is_damageable") or target.is_damageable()):
+			target.take_damage(damage)
 
 
 func _process(delta: float) -> void:
