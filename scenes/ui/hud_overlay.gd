@@ -56,10 +56,16 @@ func _process(_delta: float) -> void:
 	if Engine.is_editor_hint():
 		return
 	var sudden := false
+	var total_clubs := 0
 	for hud in _huds:
 		sudden = sudden or hud.sudden_death
+		total_clubs += hud.owned_club_count()
 	if sudden != _sudden:
 		_set_sudden(sudden)
+	# 팬클럽은 두 팀이 나눠 가지므로, 칩 슬롯 수 = 두 팀 보유 수의 합 (게임의 팬클럽 수를 따라감)
+	if total_clubs > 0:
+		for hud in _huds:
+			hud.total_clubs = total_clubs
 
 
 func _layout() -> void:
