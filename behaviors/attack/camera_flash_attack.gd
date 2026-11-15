@@ -8,6 +8,7 @@ extends FanAttack
 @export_flags_2d_physics var target_mask: int = 1
 
 const FLASH_DURATION := 0.2
+const SAFE_ZONE = preload("res://scripts/fan/safe_zone_geometry.gd")
 var flash_remaining: float = 0.0
 
 
@@ -22,6 +23,7 @@ func fire(fan: Fan) -> void:
 	query.collision_mask = target_mask
 	query.collide_with_bodies = true
 	query.collide_with_areas = false
+	var safe_zones: Array[CollisionShape2D] = SAFE_ZONE.zones_in_world(fan)
 	for hit in fan.get_world_2d().direct_space_state.intersect_shape(query, 64):
 		var target := hit.collider as Node2D
 		if not is_instance_valid(target) or not target.is_in_group("idols"):
@@ -29,7 +31,8 @@ func fire(fan: Fan) -> void:
 		if target.get("team_id") == fan.team_id or not target.has_method("apply_slow"):
 			continue
 		target.apply_slow(slow_multiplier, slow_duration)
-		if target.has_method("take_damage") \
+		if SAFE_ZONE.is_clear(target.global_position, 0.0, 0.0, safe_zones) \
+				and target.has_method("take_damage") \
 				and (not target.has_method("is_damageable") or target.is_damageable()):
 			target.take_damage(damage)
 
