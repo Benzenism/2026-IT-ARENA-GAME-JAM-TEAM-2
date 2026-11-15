@@ -9,6 +9,8 @@ const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
 const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, VERTICAL, CAMERA, GUARD]
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
+const BGM1: AudioStream = preload("res://sounds/bgm1.mp3")
+const BGM2: AudioStream = preload("res://sounds/bgm2.mp3")
 const MATCH_DURATION := 120.0
 const STAGE_OSCILLATION_AMPLITUDE := 400.0
 const STAGE_OSCILLATION_PERIOD := 30.0
@@ -27,6 +29,7 @@ var game_over := false
 var winner_team := 0
 var carrying_sources: Dictionary = {}
 var dropped_batons: Array[CaptureBaton] = []
+var music_player: AudioStreamPlayer
 var ui_connected := false
 var stage_oscillation_time := 0.0
 
@@ -37,6 +40,13 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
+	music_player = AudioStreamPlayer.new()
+	music_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	music_player.volume_db = -6.0
+	music_player.stream = BGM1
+	music_player.finished.connect(_on_music_finished)
+	add_child(music_player)
+	music_player.play()
 	var scene_root := get_tree().current_scene
 	var left_viewport := scene_root.get_node("Split/LeftContainer/LeftViewport") as SubViewport
 	var right_viewport := scene_root.get_node("Split/RightContainer/RightViewport") as SubViewport
@@ -241,6 +251,9 @@ func _resolve_time_limit() -> void:
 	var player_two_count := teams[1].owned_clubs.size()
 	if player_one_count == player_two_count:
 		sudden_death = true
+		music_player.stop()
+		music_player.stream = BGM2
+		music_player.play()
 	elif player_one_count > player_two_count:
 		_finish_game(1)
 	else:
@@ -261,6 +274,11 @@ func _finish_game(team_id: int) -> void:
 	winner._sync_population()
 	get_tree().call_group("result_screen", "play_result", team_id,
 		teams[0].owned_clubs.size(), teams[1].owned_clubs.size(), winner.used_population, sudden_death)
+
+
+func _on_music_finished() -> void:
+	if not game_over and is_instance_valid(music_player):
+		music_player.play()
 
 
 func _on_player_health_changed(_current_hp: int, _maximum_hp: int,
