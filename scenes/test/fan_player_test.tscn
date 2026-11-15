@@ -1,10 +1,18 @@
-[gd_scene load_steps=6 format=3 uid="uid://5cjkajxy3nmt"]
+[gd_scene format=3 uid="uid://5cjkajxy3nmt"]
 
-[ext_resource type="PackedScene" path="res://scenes/world/world.tscn" id="2_world"]
-[ext_resource type="Script" path="res://scenes/camera/follow_camera.gd" id="3_camera"]
+[ext_resource type="PackedScene" uid="uid://dfmhvwxcojvsj" path="res://scenes/world/world.tscn" id="2_world"]
+[ext_resource type="Script" uid="uid://cgckvl5lgysvi" path="res://scenes/camera/follow_camera.gd" id="3_camera"]
 [ext_resource type="PackedScene" path="res://scenes/ui/hud_overlay.tscn" id="4_hud"]
-[ext_resource type="PackedScene" path="res://scenes/ui/capture_menu.tscn" id="5_menu"]
+[ext_resource type="PackedScene" uid="uid://8x3b7mc64n47" path="res://scenes/ui/capture_menu.tscn" id="5_menu"]
 [ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="6_test"]
+
+[sub_resource type="Environment" id="Environment_glow"]
+background_mode = 3
+glow_enabled = true
+glow_intensity = 0.5
+glow_strength = 0.7
+glow_bloom = 0.13
+glow_hdr_threshold = 0.0
 
 [node name="FanPlayerTest" type="Control" unique_id=1443702000]
 layout_mode = 3
@@ -14,7 +22,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Split" type="HBoxContainer" parent="."]
+[node name="Split" type="HBoxContainer" parent="." unique_id=943272394]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -23,36 +31,26 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 0
 
-[node name="LeftContainer" type="SubViewportContainer" parent="Split"]
+[node name="LeftContainer" type="SubViewportContainer" parent="Split" unique_id=1730452331]
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
-[node name="LeftViewport" type="SubViewport" parent="Split/LeftContainer"]
+[node name="LeftViewport" type="SubViewport" parent="Split/LeftContainer" unique_id=365258327]
 unique_name_in_owner = true
 handle_input_locally = false
-size = Vector2i(574, 648)
+size = Vector2i(576, 648)
 render_target_update_mode = 4
 
-[node name="World" parent="Split/LeftContainer/LeftViewport" instance=ExtResource("2_world")]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Split/LeftContainer/LeftViewport" unique_id=398353053]
+environment = SubResource("Environment_glow")
+
+[node name="World" parent="Split/LeftContainer/LeftViewport" unique_id=957942236 instance=ExtResource("2_world")]
 
 [node name="FanTest" type="Node2D" parent="Split/LeftContainer/LeftViewport/World" unique_id=1977355397]
 script = ExtResource("6_test")
 
-[node name="LeftOverlay" type="Control" parent="Split/LeftContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" instance=ExtResource("5_menu")]
-team_id = 1
-input_prefix = "p1"
-
-[node name="Camera1" type="Camera2D" parent="Split/LeftContainer/LeftViewport" node_paths=PackedStringArray("target", "field")]
+[node name="Camera1" type="Camera2D" parent="Split/LeftContainer/LeftViewport" unique_id=801327257 node_paths=PackedStringArray("target", "field")]
 zoom = Vector2(0.5, 0.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
@@ -60,31 +58,28 @@ script = ExtResource("3_camera")
 target = NodePath("../World/Player1")
 field = NodePath("../World/Field")
 
-[node name="RightContainer" type="SubViewportContainer" parent="Split"]
+[node name="LeftOverlay" type="Control" parent="Split/LeftContainer" unique_id=460776509]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Player1CaptureMenu" parent="Split/LeftContainer/LeftOverlay" unique_id=1111289553 instance=ExtResource("5_menu")]
+layout_mode = 1
+
+[node name="RightContainer" type="SubViewportContainer" parent="Split" unique_id=486726655]
 layout_mode = 2
 size_flags_horizontal = 3
 stretch = true
 
-[node name="RightViewport" type="SubViewport" parent="Split/RightContainer"]
+[node name="RightViewport" type="SubViewport" parent="Split/RightContainer" unique_id=1086866906]
 unique_name_in_owner = true
 handle_input_locally = false
-size = Vector2i(574, 648)
+size = Vector2i(576, 648)
 render_target_update_mode = 4
 
-[node name="RightOverlay" type="Control" parent="Split/RightContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Split/RightContainer/RightViewport" unique_id=1677773149]
+environment = SubResource("Environment_glow")
 
-[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" instance=ExtResource("5_menu")]
-team_id = 2
-input_prefix = "p2"
-
-[node name="Camera2" type="Camera2D" parent="Split/RightContainer/RightViewport" node_paths=PackedStringArray("target", "field")]
+[node name="Camera2" type="Camera2D" parent="Split/RightContainer/RightViewport" unique_id=1801332112 node_paths=PackedStringArray("target", "field")]
 zoom = Vector2(0.5, 0.5)
 position_smoothing_enabled = true
 position_smoothing_speed = 8.0
@@ -92,5 +87,14 @@ script = ExtResource("3_camera")
 target = NodePath("../../../LeftContainer/LeftViewport/World/Player2")
 field = NodePath("../../../LeftContainer/LeftViewport/World/Field")
 
-[node name="HudOverlay" parent="." instance=ExtResource("4_hud")]
+[node name="RightOverlay" type="Control" parent="Split/RightContainer" unique_id=1644100801]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Player2CaptureMenu" parent="Split/RightContainer/RightOverlay" unique_id=924790250 instance=ExtResource("5_menu")]
+layout_mode = 1
+team_id = 2
+input_prefix = "p2"
+
+[node name="HudOverlay" parent="." unique_id=292568359 instance=ExtResource("4_hud")]
 layout_mode = 1
