@@ -19,9 +19,10 @@ const BOUNCE_INPUT_LOCK := 0.12
 const DIAGONAL_SPEED_MULTIPLIER := 1.2
 const BURST_RADIUS := 300.0
 const BURST_VISUAL_DURATION := 0.2
-const BURST_PLAYER_KNOCKBACK_DISTANCE := 250.0
+const BURST_PLAYER_KNOCKBACK_DISTANCE := 350.0
 const BURST_FAN_KNOCKBACK_DISTANCE := 350.0
-const BURST_COOLDOWN := 10.0
+const BURST_COOLDOWN_WITH_PLAYER := 10.0
+const BURST_COOLDOWN_WITHOUT_PLAYER := 5.0
 const BURST_KNOCKBACK_DECELERATION := 850.0
 const BURST_RING_RADIUS := 50.0
 const BURST_RING_CENTER := Vector2(0.0, 16.0)
@@ -48,6 +49,7 @@ var bounce_velocity := Vector2.ZERO
 var bounce_cooldown := 0.0
 var bounce_input_lock := 0.0
 var burst_cooldown_remaining := 0.0
+var burst_cooldown_duration := BURST_COOLDOWN_WITH_PLAYER
 var burst_visual_remaining := 0.0
 var burst_ready_flash_remaining := 0.0
 var facing_direction := Vector2.RIGHT
@@ -200,7 +202,7 @@ func _draw_burst_ring() -> void:
 	var ring := Color(ring_color, ring_alpha)
 	draw_arc(BURST_RING_CENTER, BURST_RING_RADIUS, 0.0, TAU, 64, Color(ring, 0.25), 3.0, true)
 	if burst_cooldown_remaining > 0.0:
-		var progress := 1.0 - burst_cooldown_remaining / BURST_COOLDOWN
+		var progress := 1.0 - burst_cooldown_remaining / burst_cooldown_duration
 		draw_arc(BURST_RING_CENTER, BURST_RING_RADIUS, -PI / 2.0,
 			-PI / 2.0 + TAU * progress, 64, ring, 3.0, true)
 	else:
@@ -210,15 +212,21 @@ func _draw_burst_ring() -> void:
 func _try_idol_burst() -> void:
 	if not is_combat_active() or burst_cooldown_remaining > 0.0:
 		return
-	burst_cooldown_remaining = BURST_COOLDOWN
 	burst_visual_remaining = BURST_VISUAL_DURATION
+	var hit_player := false
 	for idol: IdolPlayer in get_tree().get_nodes_in_group("idols"):
 		if idol == self or idol.team_id == team_id or not idol.is_combat_active():
 			continue
 		if global_position.distance_to(idol.global_position) > BURST_RADIUS:
 			continue
+		hit_player = true
 		idol.apply_burst_knockback(_burst_direction_to(idol.global_position),
 				BURST_PLAYER_KNOCKBACK_DISTANCE)
+	for projectile: FanProjectile in get_tree().get_nodes_in_group("projectiles"):
+		if global_position.distance_to(projectile.global_position) > BURST_RADIUS:
+			continue
+		projectile.consumed = true
+		projectile.queue_free()
 	for fan: Fan in get_tree().get_nodes_in_group("fans"):
 		if fan.team_id == team_id or not fan.is_combat_active():
 			continue
@@ -226,6 +234,9 @@ func _try_idol_burst() -> void:
 			continue
 		fan.apply_knockback(_burst_direction_to(fan.global_position),
 				BURST_FAN_KNOCKBACK_DISTANCE)
+	burst_cooldown_duration = BURST_COOLDOWN_WITH_PLAYER \
+			if hit_player else BURST_COOLDOWN_WITHOUT_PLAYER
+	burst_cooldown_remaining = burst_cooldown_duration
 	queue_redraw()
 
 
@@ -253,6 +264,7 @@ func is_damageable() -> bool:
 func set_own_stage(center: Vector2, radius: float) -> void:
 	own_stage_center = center
 	own_stage_radius = radius
+	spawn_position = center
 
 
 func set_movement_locked(locked: bool) -> void:
@@ -293,7 +305,8 @@ func apply_slow(multiplier: float, duration: float) -> void:
 
 
 func take_damage(amount: int) -> void:
-	if amount <= 0 or invulnerability > 0 or not is_combat_active():
+	if amount <= 0 or invulnerability > 0 or not is_combat_active() \
+			or not is_damageable():
 		return
 	drop_carried_baton()
 	hp = maxi(0, hp - amount)
