@@ -96,9 +96,11 @@ func _build() -> void:
 	_logo.pivot_offset = LOGO_RECT.size / 2.0
 	_canvas.add_child(_logo)
 
-	_start_button = _image_button(BTN_START, BTN_START_HOVER, START_POS, START_HOVER_OFFSET)
+	_start_button = _image_button(BTN_START, BTN_START_HOVER, START_POS, START_HOVER_OFFSET,
+		Vector2(468, 102))
 	_start_button.pressed.connect(_start_game)
-	var help_button := _image_button(BTN_HELP, BTN_HELP_HOVER, HELP_POS, HELP_HOVER_OFFSET)
+	var help_button := _image_button(BTN_HELP, BTN_HELP_HOVER, HELP_POS, HELP_HOVER_OFFSET,
+		Vector2(388, 82))
 	help_button.pressed.connect(_open_help)
 	_start_button.focus_neighbor_bottom = help_button.get_path()
 	help_button.focus_neighbor_top = _start_button.get_path()
@@ -127,33 +129,11 @@ func _heroine(art: Texture2D, glow: Texture2D, rect: Rect2) -> Control:
 	return holder
 
 
-## Figma에서 뽑은 기본/호버 이미지를 바꿔 끼우는 버튼. 마우스 호버와 키보드 포커스 모두 호버 모양.
-func _image_button(normal: Texture2D, hover: Texture2D, pos: Vector2, hover_offset: Vector2) -> Button:
-	var normal_size := normal.get_size() / 2.0   # 2x 이미지
-	var b := Button.new()
-	b.flat = true
-	b.focus_mode = Control.FOCUS_ALL
-	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	var empty := StyleBoxEmpty.new()
-	for st in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
-		b.add_theme_stylebox_override(st, empty)
-	HudUi.set_rect(b, pos, normal_size)
-	b.pivot_offset = normal_size / 2.0
-	var n := HudUi.texture_rect(normal, Vector2.ZERO, normal_size)
-	var h := HudUi.texture_rect(hover, hover_offset, hover.get_size() / 2.0)
-	h.visible = false
-	b.add_child(n)
-	b.add_child(h)
-	var refresh := func():
-		var on := b.has_focus() or b.is_hovered()
-		h.visible = on
-		n.visible = not on
-	b.mouse_entered.connect(func(): b.grab_focus())
-	b.mouse_exited.connect(refresh, CONNECT_DEFERRED)
-	b.focus_entered.connect(refresh)
-	b.focus_exited.connect(refresh)
-	b.button_down.connect(func(): b.scale = Vector2(0.97, 0.97))
-	b.button_up.connect(func(): b.scale = Vector2.ONE)
+## Figma에서 뽑은 기본/호버 이미지 버튼. body: 그림자를 뺀 평행사변형 몸통 크기 (호버 판정 영역)
+func _image_button(normal: Texture2D, hover: Texture2D, pos: Vector2, hover_offset: Vector2,
+		body: Vector2) -> Button:
+	var b := SlantButton.from_images(normal, hover, hover_offset, body)
+	b.position = pos
 	_canvas.add_child(b)
 	_menu.append(b)
 	return b
@@ -226,47 +206,12 @@ func _make_help() -> Control:
 	col.add_child(keys)
 	var close_row := HBoxContainer.new()
 	close_row.alignment = BoxContainer.ALIGNMENT_CENTER
-	var close := _slant_button("닫기", Vector2(240, 68))
+	var close := SlantButton.make("닫기", Vector2(230, 66), false, 30)
 	close.name = "Close"
 	close.pressed.connect(_close_help)
 	close_row.add_child(close)
 	col.add_child(close_row)
 	return layer
-
-
-## 메뉴 버튼과 같은 평행사변형 스타일의 작은 버튼 (종이 + 잉크 선 → 호버 시 잉크 + 블루 그림자)
-func _slant_button(text: String, min_size: Vector2) -> Button:
-	var b := Button.new()
-	b.text = text
-	b.custom_minimum_size = min_size
-	b.focus_mode = Control.FOCUS_ALL
-	b.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
-	b.add_theme_font_size_override("font_size", 32)
-	var normal := _slant_box(PAPER, INK, Color(INK, 0.25))
-	var hover := _slant_box(INK, INK, HudUi.BLUE)
-	b.add_theme_stylebox_override("normal", normal)
-	b.add_theme_stylebox_override("hover", hover)
-	b.add_theme_stylebox_override("focus", hover)
-	b.add_theme_stylebox_override("pressed", hover)
-	b.add_theme_stylebox_override("hover_pressed", hover)
-	b.add_theme_color_override("font_color", INK)
-	for c in ["font_hover_color", "font_focus_color", "font_pressed_color", "font_hover_pressed_color"]:
-		b.add_theme_color_override(c, Color.WHITE)
-	b.mouse_entered.connect(func(): b.grab_focus())
-	return b
-
-
-func _slant_box(bg: Color, border: Color, shadow: Color) -> StyleBoxFlat:
-	var s := StyleBoxFlat.new()
-	s.bg_color = bg
-	s.border_color = border
-	s.set_border_width_all(3)
-	s.skew = Vector2(0.25, 0)
-	s.shadow_color = shadow
-	s.shadow_size = 1
-	s.shadow_offset = Vector2(7, 7)
-	s.anti_aliasing = true
-	return s
 
 
 # --- 동작 ----------------------------------------------------------------------
