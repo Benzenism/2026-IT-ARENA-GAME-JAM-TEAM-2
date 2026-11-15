@@ -13,10 +13,14 @@ const BLUE := Color("4f8fff")
 const YELLOW := Color("ffd36b")
 const PINK_TOP := Color("ff6496")
 const PINK_BOTTOM := Color("e0144f")
-const SLANT := 0.27   ## 높이 대비 윗변이 오른쪽으로 밀린 비율 (Figma 약 15°)
+const SLANT := 0.25   ## 높이 대비 윗변이 오른쪽으로 밀린 비율 (Figma 버튼 이미지 실측)
 
-## 마지막 입력이 키보드/패드였는지 — 모든 SlantButton이 공유
-static var _keyboard_mode := true
+## 키보드/패드로 메뉴를 조작 중인지 — 모든 SlantButton이 공유.
+## 처음엔 꺼져 있어서 아무 버튼도 강조되지 않고, 방향키/확인 키를 처음 누르면 켜져서
+## 포커스된 버튼이 강조됨 (그 첫 입력은 강조만 하고 이동·실행은 하지 않음). 마우스를 움직이면 다시 꺼짐.
+static var _keyboard_mode := false
+const NAV_ACTIONS := ["ui_up", "ui_down", "ui_left", "ui_right", "ui_accept", "ui_focus_next",
+	"ui_focus_prev"]
 
 var body_size := Vector2(300, 74)
 var primary := true
@@ -26,6 +30,7 @@ var font_size := 32
 var _normal_tex: TextureRect
 var _hover_tex: TextureRect
 var _lit := false
+var _hover := false   ## 마우스가 몸통 위에 있는지 (is_hovered()는 신호 시점에 갱신 전이라 직접 추적)
 
 
 ## 코드로 그리는 버튼
@@ -67,31 +72,60 @@ func _setup(min_size: Vector2) -> void:
 	var empty := StyleBoxEmpty.new()
 	for st in ["normal", "hover", "pressed", "focus", "disabled", "hover_pressed"]:
 		add_theme_stylebox_override(st, empty)
-	mouse_entered.connect(func():
-		_keyboard_mode = false
-		grab_focus()
+	mouse_entered.connect(_on_mouse_entered)
+	mouse_exited.connect(func():
+		_hover = false
 		_refresh())
-	mouse_exited.connect(_refresh)
 	focus_entered.connect(_refresh)
 	focus_exited.connect(_refresh)
-	button_down.connect(func(): scale = Vector2(0.97, 0.97))
-	button_up.connect(func(): scale = Vector2.ONE)
+
+
+## 팝업 등으로 잠시 막을 때: 클릭·포커스 모두 안 되고 강조도 꺼짐
+func set_blocked(blocked: bool) -> void:
+	disabled = blocked
+	focus_mode = Control.FOCUS_NONE if blocked else Control.FOCUS_ALL
+	if blocked and has_focus():
+		release_focus()
+	_refresh()
 
 
 func _ready() -> void:
 	_refresh()
 
 
+func _on_mouse_entered() -> void:
+	_hover = true
+	if disabled:
+		return
+	_keyboard_mode = false
+	grab_focus()   # 마우스로 고른 버튼에서 키보드 조작을 이어가도록
+	_refresh()
+
+
 func _input(event: InputEvent) -> void:
+	if not is_visible_in_tree():
+		return
 	var was := _keyboard_mode
-	if event is InputEventMouseMotion and (event as InputEventMouseMotion).relative.length() > 0.5:
+	if event is InputEventMouseMotion:
 		_keyboard_mode = false
-	elif (event is InputEventKey or event is InputEventJoypadButton) and event.is_pressed():
+	elif not _keyboard_mode and _is_nav_press(event):
 		_keyboard_mode = true
-	elif event is InputEventJoypadMotion and absf((event as InputEventJoypadMotion).axis_value) > 0.5:
-		_keyboard_mode = true
+		# 첫 입력은 지금 고른 버튼을 보여주기만 함 (바로 옆 버튼으로 넘어가거나 눌리지 않게)
+		var owner_ := get_viewport().gui_get_focus_owner()
+		if owner_ is SlantButton and owner_.is_visible_in_tree():
+			get_viewport().set_input_as_handled()
+			(owner_ as SlantButton)._refresh()
 	if was != _keyboard_mode or _lit != _want_lit():
 		_refresh()
+
+
+func _is_nav_press(event: InputEvent) -> bool:
+	if not event.is_pressed() or event.is_echo():
+		return false
+	for a in NAV_ACTIONS:
+		if event.is_action_pressed(a):
+			return true
+	return false
 
 
 ## 보이는 몸통(평행사변형) 안쪽만 마우스 판정
@@ -102,7 +136,7 @@ func _has_point(point: Vector2) -> bool:
 func _want_lit() -> bool:
 	if disabled:
 		return false
-	return has_focus() if _keyboard_mode else is_hovered()
+	return has_focus() if _keyboard_mode else _hover
 
 
 func _refresh() -> void:

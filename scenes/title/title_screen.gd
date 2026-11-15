@@ -21,7 +21,8 @@ const BTN_HELP_HOVER := preload("res://sprites/ui/title/btn_help_hover.png")
 
 ## 디자인 배치 (1000×2000 일러스트를 디자인과 같은 크기·위치로)
 const URI_RECT := Rect2(-4.1, 163.0, 621.0, 1242.0)
-const HANA_RECT := Rect2(1384.3, 156.2, 553.9, 1273.4)
+## HANA는 원본 비율(1:2) 그대로: 디자인의 보이는 키(951)·가로 중심(x≈1660)에 맞춰 균일 스케일
+const HANA_RECT := Rect2(1343.1, 156.2, 636.7, 1273.4)
 const LOGO_RECT := Rect2(330, 70, 1260, 546.7)
 ## 버튼: 기본 이미지 위치, 호버 이미지의 기본 대비 오프셋 (호버는 몸통이 (-3,-3) 뜨고 그림자·글로우가 커짐)
 const START_POS := Vector2(730, 727)
@@ -30,12 +31,12 @@ const HELP_POS := Vector2(770, 863)
 const HELP_HOVER_OFFSET := Vector2(-3, -3)
 
 var _canvas: Control
-var _start_button: Button
+var _start_button: SlantButton
 var _help: Control
 var _uri: Control
 var _hana: Control
 var _logo: Control
-var _menu: Array[Control] = []
+var _menu: Array[SlantButton] = []
 var _leaving := false
 var _time := 0.0
 
@@ -97,10 +98,10 @@ func _build() -> void:
 	_canvas.add_child(_logo)
 
 	_start_button = _image_button(BTN_START, BTN_START_HOVER, START_POS, START_HOVER_OFFSET,
-		Vector2(468, 102))
+		Vector2(469, 104))
 	_start_button.pressed.connect(_start_game)
 	var help_button := _image_button(BTN_HELP, BTN_HELP_HOVER, HELP_POS, HELP_HOVER_OFFSET,
-		Vector2(388, 82))
+		Vector2(385, 78))
 	help_button.pressed.connect(_open_help)
 	_start_button.focus_neighbor_bottom = help_button.get_path()
 	help_button.focus_neighbor_top = _start_button.get_path()
@@ -131,7 +132,7 @@ func _heroine(art: Texture2D, glow: Texture2D, rect: Rect2) -> Control:
 
 ## Figma에서 뽑은 기본/호버 이미지 버튼. body: 그림자를 뺀 평행사변형 몸통 크기 (호버 판정 영역)
 func _image_button(normal: Texture2D, hover: Texture2D, pos: Vector2, hover_offset: Vector2,
-		body: Vector2) -> Button:
+		body: Vector2) -> SlantButton:
 	var b := SlantButton.from_images(normal, hover, hover_offset, body)
 	b.position = pos
 	_canvas.add_child(b)
@@ -209,6 +210,11 @@ func _make_help() -> Control:
 	var close := SlantButton.make("닫기", Vector2(230, 66), false, 30)
 	close.name = "Close"
 	close.pressed.connect(_close_help)
+	# 팝업 안에서 포커스가 밖으로 나가지 않게 (버튼이 하나뿐이라 자기 자신을 가리킴)
+	for side in [SIDE_LEFT, SIDE_TOP, SIDE_RIGHT, SIDE_BOTTOM]:
+		close.set_focus_neighbor(side, NodePath("."))
+	close.focus_next = NodePath(".")
+	close.focus_previous = NodePath(".")
 	close_row.add_child(close)
 	col.add_child(close_row)
 	return layer
@@ -252,11 +258,16 @@ func _start_game() -> void:
 	t.tween_callback(func(): get_tree().change_scene_to_file(GAME_SCENE))
 
 
+## 설명 팝업이 떠 있는 동안 아래 메뉴는 클릭·포커스·키 입력 모두 막음
 func _open_help() -> void:
+	for m in _menu:
+		m.set_blocked(true)
 	_help.visible = true
 	(_help.find_child("Close", true, false) as Control).grab_focus()
 
 
 func _close_help() -> void:
 	_help.visible = false
+	for m in _menu:
+		m.set_blocked(false)
 	_start_button.grab_focus()
