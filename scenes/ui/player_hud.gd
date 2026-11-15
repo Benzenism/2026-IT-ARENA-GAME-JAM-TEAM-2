@@ -52,6 +52,8 @@ const SPARKLE_8 := preload("res://sprites/ui/hud/sparkle_8.svg")
 			_build()
 ## P1/P2 태그를 이름 줄 상자 중심보다 내리는 양 (Jua 폰트의 이름 글자 '보이는' 중심에 맞춤)
 const TAG_DROP := 4.0
+## FANS 캡션을 숫자 바닥선보다 올리는 양
+const FANS_CAPTION_LIFT := 4
 
 ## 비워두면 P1 = Uri, P2 = Hana
 @export var player_name: String = "":
@@ -237,7 +239,16 @@ func _build() -> void:
 		else [_fan_count, _fan_total, fans_caption]
 	for l in order:
 		l.size_flags_vertical = Control.SIZE_SHRINK_END
-		fans_row.add_child(l)
+		if l == fans_caption:
+			# 작은 FANS 글자는 숫자 바닥선보다 살짝 위로
+			var lift := MarginContainer.new()
+			lift.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			lift.add_theme_constant_override("margin_bottom", FANS_CAPTION_LIFT)
+			lift.size_flags_vertical = Control.SIZE_SHRINK_END
+			lift.add_child(l)
+			fans_row.add_child(lift)
+		else:
+			fans_row.add_child(l)
 	_panel.add_child(fans_row)
 
 	# 승패 표시 (화면 절반 가운데)
