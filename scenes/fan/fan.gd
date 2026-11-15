@@ -9,6 +9,11 @@ signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
+# 공격 준비(주황색) 동안 납작하게 웅크렸다가, 발사하는 순간 위로 쭉 늘어난 뒤 말랑하게 돌아옴
+const SQUASH_CHARGE := Vector2(1.08, 0.92)
+const SQUASH_POP := Vector2(0.94, 1.08)
+const SQUASH_POP_TIME := 0.07
+const SQUASH_SETTLE_TIME := 0.28
 
 @export var club: FanClubData
 @export var team_id: int = 1
@@ -27,6 +32,9 @@ var first_attack_offset: float = 0.0
 var knockback_velocity := Vector2.ZERO
 var hit_flash_tween: Tween
 var hit_flash_base_color := Color.WHITE
+var squash_tween: Tween
+var _sprite_base_y := 0.0
+var _sprite_half_height := 0.0
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var sprite: Sprite2D = $Sprite2D
@@ -46,6 +54,8 @@ func _ready() -> void:
 		instance_shape.radius = maxf(1.0, club.hitbox_radius)
 		body_collision.shape = instance_shape
 	sprite.texture = club.sprite_texture
+	_sprite_base_y = sprite.position.y
+	_sprite_half_height = club.sprite_texture.get_height() * absf(sprite.scale.y) * 0.5
 	motion_mode = CharacterBody2D.MOTION_MODE_FLOATING
 	add_to_group("fans")
 	if club.intercepts_projectiles:
@@ -167,6 +177,7 @@ func _on_attack_timeout() -> void:
 	is_charging = true
 	charge_base_color = hit_flash_base_color if hit_flash_tween != null and hit_flash_tween.is_running() else sprite.modulate
 	charge_timer.start()
+	_squash_charge(charge_timer.wait_time)
 	queue_redraw()
 
 
@@ -176,6 +187,7 @@ func _on_charge_finished() -> void:
 	is_charging = false
 	if hit_flash_tween == null or not hit_flash_tween.is_running():
 		sprite.modulate = charge_base_color
+	_squash_pop()
 	attack.fire(self)
 	queue_redraw()
 	attack_timer.start(maxf(0.05, club.attack_interval - charge_timer.wait_time))
@@ -212,6 +224,37 @@ func _show_hit_flash() -> void:
 	hit_flash_tween.tween_property(sprite, "modulate", hit_flash_base_color, club.hit_flash_duration)
 
 
+## 스프라이트 크기를 바꾸되 아래쪽(발)은 제자리에 붙어 있게 위치를 보정
+func _set_squash(amount: Vector2) -> void:
+	sprite.scale = amount
+	sprite.position.y = _sprite_base_y + (1.0 - amount.y) * _sprite_half_height
+
+
+func _squash_charge(duration: float) -> void:
+	if squash_tween != null and squash_tween.is_valid():
+		squash_tween.kill()
+	squash_tween = create_tween()
+	squash_tween.tween_method(_set_squash, sprite.scale, SQUASH_CHARGE, duration) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_SINE)
+
+
+func _squash_pop() -> void:
+	if squash_tween != null and squash_tween.is_valid():
+		squash_tween.kill()
+	squash_tween = create_tween()
+	squash_tween.tween_method(_set_squash, sprite.scale, SQUASH_POP, SQUASH_POP_TIME) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_QUAD)
+	# 여러 번 출렁이는 ELASTIC 대신 한 번만 살짝 넘어갔다 돌아오는 BACK
+	squash_tween.tween_method(_set_squash, SQUASH_POP, Vector2.ONE, SQUASH_SETTLE_TIME) \
+		.set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+
+func _squash_reset() -> void:
+	if squash_tween != null and squash_tween.is_valid():
+		squash_tween.kill()
+	_set_squash(Vector2.ONE)
+
+
 func heal(amount: int) -> void:
 	if is_combat_active() and amount > 0:
 		hp = mini(club.max_hp, hp + amount)
@@ -238,6 +281,7 @@ func despawn() -> void:
 	charge_timer.stop()
 	attack.cancel_burst()
 	is_charging = false
+	_squash_reset()
 	queue_redraw()
 	despawned.emit(club.population_cost)
 	if has_died and club.hit_flash_duration > 0.0:

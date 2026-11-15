@@ -41,6 +41,9 @@ var _time_label: Label
 var _time_ribbon: Control
 var _sudden_label: Label
 var _sudden_ribbon: Control
+var _danger: Control          # 서든데스 때 화면 가장자리가 붉어지는 효과
+var _danger_time := 0.0
+var _danger_boost := 0.0      # 서든데스 시작 순간의 번쩍임 (점점 줄어듦)
 
 
 func _ready() -> void:
@@ -59,6 +62,12 @@ func _process(_delta: float) -> void:
 		sudden = sudden or hud.sudden_death
 	if sudden != _sudden:
 		_set_sudden(sudden)
+	if _sudden:
+		# 심장 박동처럼 천천히 맥동 + 시작 순간 강하게 번쩍였다가 가라앉음
+		_danger_time += _delta
+		_danger_boost = maxf(0.0, _danger_boost - _delta * 0.8)
+		var beat := 0.72 + 0.28 * sin(_danger_time * TAU * 0.75)
+		_danger.modulate.a = clampf(beat + _danger_boost * 0.6, 0.0, 1.0)
 
 
 func _layout() -> void:
@@ -80,6 +89,8 @@ func _build() -> void:
 	add_child(_canvas)
 
 	_canvas.add_child(_make_divider())
+	_danger = _make_danger_vignette()
+	_canvas.add_child(_danger)
 	_canvas.add_child(_make_clock())
 	for team in [1, 2]:
 		var hud := PlayerHud.new()
@@ -98,6 +109,12 @@ func _build() -> void:
 	cutin.name = "StealCutIn"
 	_anchor(cutin, 0, 0, 1, 1, Rect2())
 	_canvas.add_child(cutin)
+
+	# 경기 종료 연출 (컷인보다 위)
+	var result := ResultScreen.new()
+	result.name = "ResultScreen"
+	_anchor(result, 0, 0, 1, 1, Rect2())
+	_canvas.add_child(result)
 
 	_set_sudden(false)
 
@@ -205,8 +222,45 @@ func _ribbon(text: String, bg: Color, fg: Color) -> HBoxContainer:
 	return row
 
 
+## 화면 네 가장자리에만 얇게 붉은 빛 (안쪽으로 갈수록 투명) — 게임 화면은 가리지 않음
+const DANGER_EDGE := 70.0
+
+func _make_danger_vignette() -> Control:
+	var root := Control.new()
+	root.name = "SuddenDeathVignette"
+	root.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_anchor(root, 0, 0, 1, 1, Rect2())
+	root.visible = false
+	var red := Color(1.0, 0.12, 0.22)
+	# 바깥(화면 끝) → 안쪽 그라디언트
+	var stops := [[0.0, Color(red, 0.55)], [0.45, Color(red, 0.2)], [1.0, Color(red, 0.0)]]
+	var e := DANGER_EDGE
+	# [앵커 l, t, r, b], [오프셋 rect], 그라디언트 방향(from → to)
+	var sides := [
+		[[0, 0, 1, 0], Rect2(0, 0, 0, e), Vector2(0.5, 0), Vector2(0.5, 1)],     # 위
+		[[0, 1, 1, 1], Rect2(0, -e, 0, e), Vector2(0.5, 1), Vector2(0.5, 0)],    # 아래
+		[[0, 0, 0, 1], Rect2(0, 0, e, 0), Vector2(0, 0.5), Vector2(1, 0.5)],     # 왼쪽
+		[[1, 0, 1, 1], Rect2(-e, 0, e, 0), Vector2(1, 0.5), Vector2(0, 0.5)],    # 오른쪽
+	]
+	for side in sides:
+		var tex := HudUi.h_gradient(stops)
+		tex.width = 64
+		tex.height = 64
+		tex.fill_from = side[2]
+		tex.fill_to = side[3]
+		var strip := HudUi.texture_rect(tex, Vector2.ZERO, Vector2.ZERO)
+		var a: Array = side[0]
+		_anchor(strip, a[0], a[1], a[2], a[3], side[1])
+		root.add_child(strip)
+	return root
+
+
 func _set_sudden(sudden: bool) -> void:
 	_sudden = sudden
+	_danger.visible = sudden
+	if sudden:
+		_danger_time = 0.0
+		_danger_boost = 1.0
 	var tex: Dictionary = CLOCK_TEX[sudden]
 	_tab_glow.texture = tex["tab"]
 	_tab_fill.texture = tex["tab_shape"]

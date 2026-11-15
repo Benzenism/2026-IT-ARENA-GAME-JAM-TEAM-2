@@ -10,8 +10,8 @@ config_version=5
 
 [application]
 
-config/name="magicalidols"
-run/main_scene="res://scenes/test/fan_player_test.tscn"
+config/name="마법소녀는 사랑받고 싶어"
+run/main_scene="res://scenes/title/title_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
 

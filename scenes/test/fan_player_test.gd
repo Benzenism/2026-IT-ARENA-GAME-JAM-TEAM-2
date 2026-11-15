@@ -226,6 +226,11 @@ func _finish_game(team_id: int) -> void:
 		player.set_movement_locked(true)
 	for menu: CaptureMenu in get_tree().get_nodes_in_group("capture_menus"):
 		menu.close_menu()
+	# 경기 종료 연출 (GAME SET → 승리/패배 → 다시하기/타이틀로)
+	var winner := _team(team_id)
+	winner._sync_population()
+	get_tree().call_group("result_screen", "play_result", team_id,
+		teams[0].owned_clubs.size(), teams[1].owned_clubs.size(), winner.used_population, sudden_death)
 
 
 func _on_player_health_changed(_current_hp: int, _maximum_hp: int,

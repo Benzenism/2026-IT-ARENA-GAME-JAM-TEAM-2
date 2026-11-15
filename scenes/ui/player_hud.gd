@@ -94,10 +94,8 @@ func _ready() -> void:
 func set_match_state(_time_left: float, is_sudden_death: bool, game_over: bool,
 		winner_team: int) -> void:
 	sudden_death = is_sudden_death
-	if game_over:
-		_status.text = "YOU WIN" if winner_team == team_id else "YOU LOSE"
-	else:
-		_status.text = ""
+	# 승패는 경기 종료 연출(ResultScreen)이 보여주므로 패널에는 표시하지 않음
+	_status.text = ""
 
 
 func set_player_state(hp: int, _max_hp: int, clubs: Array[FanClubData],
@@ -268,7 +266,8 @@ func _make_name_shade() -> TextureRect:
 	return HudUi.texture_rect(tex, Vector2(_mx(-20, 320), 80), Vector2(320, 150))
 
 
-## HP에 따라 초상화 교체: 2 이상 = 기본, 1 = 아파하는 표정 일러스트, 0 = 흑백(리스폰하면 원래대로).
+## HP에 따라 초상화 교체: 2 이상 = 기본, 1 = 아파하는 표정 일러스트,
+## 0 = 아파하는 표정 일러스트를 흑백으로 (리스폰하면 기본 일러스트로).
 ## HP가 줄어든 순간(0이 된 경우 제외)에는 붉은 플래시.
 func _update_portrait(hp: int) -> void:
 	if _portrait == null:
@@ -277,11 +276,12 @@ func _update_portrait(hp: int) -> void:
 	_last_hp = hp
 
 	if hp <= 0:
+		# 쓰러진 동안은 중상 일러스트를 그대로 흑백으로 — 부활(HP 회복)해야 기본 일러스트로 돌아감
 		if _gray_material == null:
 			_gray_material = ShaderMaterial.new()
 			_gray_material.shader = GRAYSCALE
 		_portrait.material = _gray_material
-		_portrait.texture = _tex("portrait")
+		_portrait.texture = _hurt_texture if _hurt_texture != null else _tex("portrait")
 		_stop_flash()
 		return
 

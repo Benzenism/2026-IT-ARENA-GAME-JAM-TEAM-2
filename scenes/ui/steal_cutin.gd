@@ -7,6 +7,9 @@ extends Control
 ##
 ## 사용: get_tree().call_group("steal_cutin", "play_steal", team_id)
 
+## 대기열까지 모두 재생하고 끝났을 때 (경기 종료 연출이 이걸 기다림)
+signal finished
+
 const DESIGN := Vector2(1920, 1200)
 
 # 타임라인 (초) — Figma: 1 Flash 0.00 / 2 Slide-in 0.05 / 3 Hold 0.25–1.15 / 4 Out 1.15
@@ -15,6 +18,7 @@ const T_HOLD := 0.25
 const T_OUT := 1.15
 const T_END := 1.40
 
+const TITLE_BOX := Vector2(760, 330) # "FAN STEAL! / 팬 쟁탈!" 묶음 크기
 const SILHOUETTE := preload("res://scenes/ui/hud/silhouette.gdshader")
 const SPARKLE := preload("res://sprites/ui/hud/sparkle_12.svg")
 
@@ -79,6 +83,7 @@ const SPEED_LINES := [
 ]
 
 var _playing := false
+var _span_cache := {}
 var _queue: Array[int] = []
 var _was_paused := false
 var _tween: Tween
@@ -134,6 +139,7 @@ func _finish() -> void:
 		play_steal(_queue.pop_front())
 		return
 	get_tree().paused = _was_paused
+	finished.emit()
 
 
 # --- 구성 ----------------------------------------------------------------------
@@ -172,7 +178,7 @@ func _build(team_id: int) -> void:
 	_watermark.rotation_degrees = s["angle"]
 	_stage.add_child(_watermark)
 
-	_stage.add_child(_make_character(s))
+	_stage.add_child(_make_character(s, team_id))
 	_stage.add_child(_make_title(s, team_id))
 
 	for sp in s["sparkles"]:
@@ -240,8 +246,14 @@ func _make_band(s: Dictionary) -> Control:
 	return _band
 
 
-func _make_character(s: Dictionary) -> Control:
+func _make_character(s: Dictionary, team_id: int) -> Control:
 	var rect: Rect2 = s["char_rect"]
+	# 캐릭터(보이는 부분)의 가운데가 화면 끝과 "팬 쟁탈!" 글씨 사이의 한가운데에 오게 가로 위치 조정
+	var span := _visible_span(s["art"], rect.size)
+	var title_center: Vector2 = s["title_center"]
+	var text_edge := title_center.x - TITLE_BOX.x / 2.0 if team_id == 1 else title_center.x + TITLE_BOX.x / 2.0
+	var screen_edge := 0.0 if team_id == 1 else DESIGN.x
+	rect.position.x = (screen_edge + text_edge) / 2.0 - (span.x + span.y) / 2.0
 	_character = Control.new()
 	_character.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HudUi.set_rect(_character, rect.position, rect.size)
@@ -259,6 +271,21 @@ func _make_character(s: Dictionary) -> Control:
 	return _character
 
 
+## 상자(box) 안에 비율 유지로 그렸을 때, 일러스트의 실제로 보이는 부분(투명 아닌 픽셀)의 가로 범위
+func _visible_span(tex: Texture2D, box: Vector2) -> Vector2:
+	var key := tex.resource_path
+	if not _span_cache.has(key):
+		var img := tex.get_image()
+		if img.is_compressed():
+			img.decompress()
+		var used := img.get_used_rect()
+		_span_cache[key] = Vector4(used.position.x, used.end.x, img.get_width(), img.get_height())
+	var u: Vector4 = _span_cache[key]
+	var fit := minf(box.x / u.z, box.y / u.w)
+	var off_x := (box.x - u.z * fit) / 2.0
+	return Vector2(off_x + u.x * fit, off_x + u.y * fit)
+
+
 func _art_rect(tex: Texture2D, box: Vector2) -> TextureRect:
 	var t := HudUi.texture_rect(tex, Vector2.ZERO, box)
 	t.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -267,7 +294,7 @@ func _art_rect(tex: Texture2D, box: Vector2) -> TextureRect:
 
 func _make_title(s: Dictionary, team_id: int) -> Control:
 	# "FAN STEAL!" 리본 + "팬 쟁탈!" — 설명(팬클럽 카드, 누구→누구)은 넣지 않음
-	var box_size := Vector2(760, 330)
+	var box_size := TITLE_BOX
 	_title = Control.new()
 	_title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HudUi.set_rect(_title, s["title_center"] - box_size / 2.0, box_size)
