@@ -7,6 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://djcvjnxnmfnad" path="res://sprites/stage/stage1.png" id="4_stage1"]
 [ext_resource type="Texture2D" uid="uid://bx5x8j2drecuk" path="res://sprites/stage/stage2.png" id="5_stage2"]
 [ext_resource type="Texture2D" uid="uid://blxvnklocqwkn" path="res://sprites/player2_sprite.png" id="8_1yooq"]
+[ext_resource type="PackedScene" path="res://scenes/obstacle/speaker.tscn" id="9_speaker"]
+[ext_resource type="PackedScene" path="res://scenes/obstacle/barricade.tscn" id="10_barricade"]
 
 [node name="World" type="Node2D" unique_id=557916526]
 
@@ -34,3 +36,33 @@ position = Vector2(1600, 0)
 input_prefix = "p2"
 player_texture = ExtResource("8_1yooq")
 team_id = 2
+
+[node name="Speaker1" parent="." unique_id=2111664577 instance=ExtResource("9_speaker")]
+position = Vector2(-1750, -360)
+
+[node name="Speaker4" parent="." unique_id=695899236 instance=ExtResource("9_speaker")]
+position = Vector2(-1750, 360)
+
+[node name="Speaker5" parent="." unique_id=1937277543 instance=ExtResource("9_speaker")]
+position = Vector2(1750, -360)
+
+[node name="Speaker6" parent="." unique_id=587988078 instance=ExtResource("9_speaker")]
+position = Vector2(1750, 360)
+
+[node name="Speaker2" parent="." unique_id=2044483761 instance=ExtResource("9_speaker")]
+position = Vector2(0, 260)
+
+[node name="Speaker3" parent="." unique_id=1822229622 instance=ExtResource("9_speaker")]
+position = Vector2(0, -260)
+
+[node name="Barricade1" parent="." unique_id=22965786 instance=ExtResource("10_barricade")]
+position = Vector2(-512, -650)
+
+[node name="Barricade2" parent="." unique_id=100094077 instance=ExtResource("10_barricade")]
+position = Vector2(500, -250)
+
+[node name="Barricade3" parent="." unique_id=722580566 instance=ExtResource("10_barricade")]
+position = Vector2(-600, 300)
+
+[node name="Barricade4" parent="." unique_id=1871039163 instance=ExtResource("10_barricade")]
+position = Vector2(521, 631)

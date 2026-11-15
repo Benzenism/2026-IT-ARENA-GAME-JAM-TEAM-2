@@ -88,6 +88,17 @@ func _physics_process(_delta: float) -> void:
 			else movement.get_direction(self).limit_length(1.0) * club.move_speed
 	velocity = movement_velocity + knockback_velocity
 	move_and_slide()
+	for i in get_slide_collision_count():
+		var collision := get_slide_collision(i)
+		var obstacle := collision.get_collider() as ArenaObstacle
+		if obstacle == null:
+			continue
+		var away := collision.get_normal().normalized()
+		if away.is_zero_approx():
+			away = obstacle.global_position.direction_to(global_position)
+		apply_knockback(away, 150.0)
+		obstacle.apply_push(-away, 450.0)
+		break
 	if not arena_rect.grow(24.0).has_point(global_position):
 		exit_map()
 
