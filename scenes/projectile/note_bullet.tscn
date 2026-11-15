@@ -19,7 +19,7 @@ wave_frequency = 2.4
 
 [node name="ProjectileVisual" type="Node2D" parent="."]
 material = SubResource("ShotGlow")
-scale = Vector2(1.5, 1.5)
+scale = Vector2(3, 3)
 script = ExtResource("2_visual")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
