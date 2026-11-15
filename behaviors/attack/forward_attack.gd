@@ -1,6 +1,6 @@
 extends FanAttack
 
-@export_range(0.0, 64.0, 1.0) var triangle_depth: float = 24.0
+@export_range(0.0, 64.0, 1.0) var triangle_depth: float = 40.0
 @export_range(0.0, 48.0, 1.0) var triangle_half_width: float = 16.0
 
 
