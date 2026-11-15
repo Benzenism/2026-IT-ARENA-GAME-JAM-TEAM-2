@@ -152,7 +152,7 @@ func _make_help() -> Control:
 	layer.add_child(dim)
 
 	# 종이 패널 + 잉크 테두리 + 핑크 하드 섀도
-	var rect := Rect2(400, 290, 1120, 620)
+	var rect := Rect2(340, 255, 1240, 690)
 	var shadow := ColorRect.new()
 	shadow.color = RED
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -182,13 +182,15 @@ func _make_help() -> Control:
 	rule.custom_minimum_size = Vector2(120, 6)
 	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(rule)
+	# 진행 → 에너지 방출(Shift) → 승리 조건(전부 차지 / 2분 뒤 다수 / 동점이면 서든데스) 순서
 	var lines := [
-		"상대 무대에 들어가면 팬클럽 응원봉을 하나 뺏어 와요.",
-		"응원봉을 내 무대까지 가져오면 그 팬클럽이 내 편이 돼요.",
-		"팬들의 응원 탄에 맞으면 하트가 줄고 응원봉을 떨어뜨려요.",
-		"2분이 지나면 팬클럽이 더 많은 쪽이 승리!",
-		"같으면 서든데스 — 먼저 하나 가져오는 쪽이 승리.",
-		"상대의 팬클럽을 모두 뺏으면 그 자리에서 승리!",
+		"상대 무대에 들어가면 팬클럽 응원봉을 하나 빼앗아 올 수 있습니다.",
+		"응원봉을 내 무대까지 가져오면 그 팬클럽이 내 팬이 됩니다.",
+		"팬들의 응원 탄에 맞으면 하트가 줄고, 들고 있던 응원봉을 떨어뜨립니다.",
+		"Shift를 누르면 에너지를 방출해 주변의 상대와 팬을 밀쳐내고,\n응원 탄을 지웁니다. 사용 후에는 잠시 재충전이 필요합니다.",
+		"상대의 팬을 모두 가져오면 그 즉시 승리합니다.",
+		"2분이 지나면 팬을 더 많이 가진 쪽이 승리합니다.",
+		"동점이라면 서든데스가 시작되며, 먼저 팬을 가져오는 쪽이 승리합니다.",
 	]
 	for i in range(lines.size()):
 		var row := HBoxContainer.new()
@@ -199,11 +201,11 @@ func _make_help() -> Control:
 		bullet.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(bullet)
 		var l := HudUi.label(lines[i], 32, INK)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		l.autowrap_mode = TextServer.AUTOWRAP_WORD   # 띄어쓰기에서만 줄바꿈 (단어 중간에서 끊기지 않게)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
 		col.add_child(row)
-	var keys := HudUi.label("P1  W A S D   ·   P2  ← ↑ ↓ →", 26, Color(INK, 0.6))
+	var keys := HudUi.label("P1  W A S D · 왼쪽 Shift      P2  ← ↑ ↓ → · 오른쪽 Shift", 26, Color(INK, 0.6))
 	keys.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(keys)
 	var close_row := HBoxContainer.new()
