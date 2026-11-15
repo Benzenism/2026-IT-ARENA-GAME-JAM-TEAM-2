@@ -12,7 +12,7 @@ const CHIP_STEP := 59.0 # 54 슬롯 + 5 간격 (아이콘 46은 슬롯 가운데
 const CHIP_ROW_WIDTH := CHIP_SIZE * 5 + (CHIP_STEP - CHIP_SIZE) * 4
 const CHIP_TIGHT_GAP := 8.0
 ## 초상화(+뒤 오라)를 디자인 위치보다 화면 가운데 쪽으로 옮기는 양 (디자인 px)
-const PORTRAIT_INSET := 12.0
+const PORTRAIT_INSET := -5.0
 ## 초상화를 패널(230) 위로 올리는 양. 초상화 아래는 화면 끝(패널 바닥)에 붙어 있고
 ## 높이 = 230 + 이 값.
 const PORTRAIT_RAISE := 110.0
@@ -32,8 +32,8 @@ const TEX := {
 		"aura": preload("res://sprites/ui/hud/aura_p2.svg"),
 	},
 }
-## HP 1일 때 쓸 중상(아파하는 표정) 일러스트. 지금은 기본 일러스트를 색 반전한 임시 이미지 —
-## 진짜 일러스트가 나오면 같은 이름으로 덮어쓰면 됨. 파일이 없으면 HP 1이어도 기본 일러스트.
+## HP 1일 때 쓸 중상(아파하는 표정) 일러스트 — uriLose / hanaLose를 기본 초상화와 같은 틀로
+## 잘라 둔 것. 파일이 없으면 HP 1이어도 기본 일러스트.
 const HURT_PORTRAIT_PATH := {
 	1: "res://sprites/ui/hud/portrait_p1_hurt.png",
 	2: "res://sprites/ui/hud/portrait_p2_hurt.png",
