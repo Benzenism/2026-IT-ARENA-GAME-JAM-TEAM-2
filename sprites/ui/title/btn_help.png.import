@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d0w1mebcmugdj"
-path="res://.godot/imported/sparkle_b_shape.svg-9317883a9b76e60ca37469dae6b7bdcf.ctex"
+uid="uid://bwa5y04j5goq3"
+path="res://.godot/imported/btn_help.png-9ff2dcda9a5ecbaea1c1c8effb6b0c4d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/sparkle_b_shape.svg"
-dest_files=["res://.godot/imported/sparkle_b_shape.svg-9317883a9b76e60ca37469dae6b7bdcf.ctex"]
+source_file="res://sprites/ui/title/btn_help.png"
+dest_files=["res://.godot/imported/btn_help.png-9ff2dcda9a5ecbaea1c1c8effb6b0c4d.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

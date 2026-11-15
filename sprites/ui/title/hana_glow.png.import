@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dskgv40coa87e"
-path="res://.godot/imported/sparkle_a.svg-a73d6c5420d3b2e8ad390af0cc8dd196.ctex"
+uid="uid://bami1com5obpa"
+path="res://.godot/imported/hana_glow.png-ea6751612c30b7fb3c75d89d7d117d2e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/sparkle_a.svg"
-dest_files=["res://.godot/imported/sparkle_a.svg-a73d6c5420d3b2e8ad390af0cc8dd196.ctex"]
+source_file="res://sprites/ui/title/hana_glow.png"
+dest_files=["res://.godot/imported/hana_glow.png-ea6751612c30b7fb3c75d89d7d117d2e.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

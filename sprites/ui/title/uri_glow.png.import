@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ngi6pkxgkmvc"
-path="res://.godot/imported/glow_uri.svg-cead1891a2b7cfa34ea5eb6dbf479620.ctex"
+uid="uid://csvfmb1yryifj"
+path="res://.godot/imported/uri_glow.png-af813fae5e47747f40390f3cfad41d2f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/glow_uri.svg"
-dest_files=["res://.godot/imported/glow_uri.svg-cead1891a2b7cfa34ea5eb6dbf479620.ctex"]
+source_file="res://sprites/ui/title/uri_glow.png"
+dest_files=["res://.godot/imported/uri_glow.png-af813fae5e47747f40390f3cfad41d2f.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

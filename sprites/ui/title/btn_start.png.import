@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dpsvv7h2alqqg"
-path="res://.godot/imported/sparkle_c.svg-aba3f1dc944ad644fad8fab706b6460c.ctex"
+uid="uid://buono30jp16be"
+path="res://.godot/imported/btn_start.png-88fc5482c15a0b3ee5cac51ff78b332a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/sparkle_c.svg"
-dest_files=["res://.godot/imported/sparkle_c.svg-aba3f1dc944ad644fad8fab706b6460c.ctex"]
+source_file="res://sprites/ui/title/btn_start.png"
+dest_files=["res://.godot/imported/btn_start.png-88fc5482c15a0b3ee5cac51ff78b332a.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

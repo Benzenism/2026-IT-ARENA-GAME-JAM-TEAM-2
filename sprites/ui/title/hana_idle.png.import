@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bdm8kcoj3kred"
-path="res://.godot/imported/sparkle_a_shape.svg-7d62c8768c6c34500d7ffa4d7970cbc1.ctex"
+uid="uid://drq4y8dogvaf5"
+path="res://.godot/imported/hana_idle.png-fb88df97c8548b65b90ec43f8d576e3f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/sparkle_a_shape.svg"
-dest_files=["res://.godot/imported/sparkle_a_shape.svg-7d62c8768c6c34500d7ffa4d7970cbc1.ctex"]
+source_file="res://sprites/ui/title/hana_idle.png"
+dest_files=["res://.godot/imported/hana_idle.png-fb88df97c8548b65b90ec43f8d576e3f.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false
