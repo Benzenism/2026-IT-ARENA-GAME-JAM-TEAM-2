@@ -11,6 +11,7 @@ const ENTRY_FLASH_DURATION := 0.18
 const ENTRY_FLASH_BRIGHTNESS := 0.25
 
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var safe_zone: AnimatableBody2D = $SafeZone
 var pulse_time := 0.0
 var entry_flash_remaining := 0.0
 
@@ -37,3 +38,7 @@ func _on_body_entered(body: Node2D) -> void:
 	if body.is_in_group("idols"):
 		entry_flash_remaining = ENTRY_FLASH_DURATION
 		idol_entered.emit(body as IdolPlayer, self)
+
+
+func sync_safe_zone() -> void:
+	safe_zone.global_position = global_position

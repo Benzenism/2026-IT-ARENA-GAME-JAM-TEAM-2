@@ -113,6 +113,7 @@ func _physics_process(delta: float) -> void:
 				* STAGE_HORIZONTAL_AMPLITUDE
 		stages[index].position = stage_base_positions[index] \
 				+ Vector2(horizontal_offset, vertical_offset)
+		stages[index].sync_safe_zone()
 		stages[index].sprite.rotation = stage_oscillation_time \
 				/ STAGE_ROTATION_PERIOD * TAU
 		players[index].set_own_stage(stages[index].global_position, 220.0)
@@ -203,7 +204,7 @@ func _spawn_dropped_baton(idol: IdolPlayer, club: FanClubData, position: Vector2
 
 
 func _on_baton_picked_up(baton: CaptureBaton, idol: IdolPlayer) -> void:
-	if game_over or idol.carried_club != null:
+	if game_over or not idol.is_combat_active() or idol.carried_club != null:
 		return
 	_remove_dropped_baton(baton)
 	idol.start_carrying(baton.club)

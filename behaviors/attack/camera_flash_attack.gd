@@ -44,13 +44,15 @@ func _process(delta: float) -> void:
 
 
 func draw_telegraph(fan: Fan) -> void:
-	fan.draw_circle(Vector2.ZERO, radius, Color(1.0, 0.8, 0.35, 0.2))
-	fan.draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(1.0, 0.85, 0.45, 0.95), 3.0, true)
+	var tint := fan.get_warning_color()
+	fan.draw_circle(Vector2.ZERO, radius, Color(tint, 0.2))
+	fan.draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(tint, 0.95), 3.0, true)
 
 
 func draw_effect(fan: Fan) -> void:
 	if flash_remaining <= 0.0:
 		return
 	var alpha := flash_remaining / FLASH_DURATION
-	fan.draw_circle(Vector2.ZERO, radius, Color(1.0, 0.96, 0.75, 0.45 * alpha))
-	fan.draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(1.0, 1.0, 0.9, alpha), 5.0, true)
+	var flash_color := fan.get_warning_color().lightened(0.75)
+	fan.draw_circle(Vector2.ZERO, radius, Color(flash_color, 0.45 * alpha))
+	fan.draw_arc(Vector2.ZERO, radius, 0.0, TAU, 64, Color(Color.WHITE, alpha), 5.0, true)

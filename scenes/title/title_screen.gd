@@ -8,6 +8,8 @@ const PAPER := Color("fbf5f8")
 const INK := Color("160c26")
 const RED := Color("ff2e6e")
 
+const BGM2: AudioStream = preload("res://sounds/bgm2.mp3")
+
 const BG := preload("res://sprites/ui/title/title_bg_paper.png")
 const LOGO := preload("res://sprites/ui/title/title_logo.png")
 const URI_ART := preload("res://sprites/ui/title/uri_idle.png")
@@ -32,12 +34,20 @@ var _uri: Control
 var _hana: Control
 var _logo: Control
 var _menu: Array[SlantButton] = []
+var _music_player: AudioStreamPlayer
 var _leaving := false
 var _time := 0.0
 
 
 func _ready() -> void:
 	get_tree().paused = false
+	_music_player = AudioStreamPlayer.new()
+	_music_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	_music_player.volume_db = -6.0
+	_music_player.stream = BGM2
+	_music_player.finished.connect(_on_music_finished)
+	add_child(_music_player)
+	_music_player.play()
 	_build()
 	resized.connect(_layout)
 	_layout()
@@ -60,6 +70,11 @@ func _process(delta: float) -> void:
 	var bob := sin(_time * 1.6) * 5.0
 	_uri.position.y = float(_uri.get_meta("base_y")) + bob
 	_hana.position.y = float(_hana.get_meta("base_y")) - bob
+
+
+func _on_music_finished() -> void:
+	if not _leaving and is_instance_valid(_music_player):
+		_music_player.play()
 
 
 func _unhandled_input(event: InputEvent) -> void:
