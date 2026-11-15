@@ -7,7 +7,7 @@ const INK := Color("160c26")
 const PAPER := Color("fbf5f8")
 const FADE_TIME := 0.3
 
-# 컷이 하나씩 추가된 임시 전체 이미지. 완성본은 타이틀 씬의 Inspector에서 교체한다.
+# 컷이 하나씩 추가되는 전체 이미지. 필요하면 타이틀 씬의 Inspector에서 교체한다.
 const DEFAULT_IMAGES := [
 	preload("res://sprites/ui/intro/comic_1.png"),
 	preload("res://sprites/ui/intro/comic_2.png"),
