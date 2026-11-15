@@ -57,6 +57,18 @@ var facing_direction := Vector2.RIGHT
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _baton_sprite: Sprite2D = $BatonSprite
 @onready var _aura_sprite: Sprite2D = $AuraSprite
+@onready var _burst_sound_p1: AudioStreamPlayer = $BurstSoundP1
+@onready var _burst_sound_p2: AudioStreamPlayer = $BurstSoundP2
+@onready var _death_sound_p1: AudioStreamPlayer = $DeathSoundP1
+@onready var _death_sound_p2: AudioStreamPlayer = $DeathSoundP2
+@onready var _hurt_sound_p1: AudioStreamPlayer = $HurtSoundP1
+@onready var _hurt_sound_p2: AudioStreamPlayer = $HurtSoundP2
+@onready var _steal_sound_p1: AudioStreamPlayer = $StealSoundP1
+@onready var _steal_sound_p2: AudioStreamPlayer = $StealSoundP2
+@onready var _score_sound_p1: AudioStreamPlayer = $ScoreSoundP1
+@onready var _score_sound_p2: AudioStreamPlayer = $ScoreSoundP2
+@onready var _win_sound_p1: AudioStreamPlayer = $WinSoundP1
+@onready var _win_sound_p2: AudioStreamPlayer = $WinSoundP2
 
 
 func _ready() -> void:
@@ -213,6 +225,7 @@ func _try_idol_burst() -> void:
 	if not is_combat_active() or burst_cooldown_remaining > 0.0:
 		return
 	burst_visual_remaining = BURST_VISUAL_DURATION
+	_play_team_sound(_burst_sound_p1, _burst_sound_p2)
 	var hit_player := false
 	for idol: IdolPlayer in get_tree().get_nodes_in_group("idols"):
 		if idol == self or idol.team_id == team_id or not idol.is_combat_active():
@@ -282,6 +295,22 @@ func start_carrying(club: FanClubData) -> void:
 	_baton_sprite.visible = true
 
 
+func play_steal_sound() -> void:
+	_play_team_sound(_steal_sound_p1, _steal_sound_p2)
+
+
+func play_score_sound() -> void:
+	_play_team_sound(_score_sound_p1, _score_sound_p2)
+
+
+func play_win_sound() -> void:
+	_play_team_sound(_win_sound_p1, _win_sound_p2)
+
+
+func _play_team_sound(player_one_sound: AudioStreamPlayer, player_two_sound: AudioStreamPlayer) -> void:
+	(player_one_sound if team_id == 1 else player_two_sound).play()
+
+
 func finish_carrying() -> FanClubData:
 	var club := carried_club
 	carried_club = null
@@ -308,12 +337,14 @@ func take_damage(amount: int) -> void:
 	if amount <= 0 or invulnerability > 0 or not is_combat_active() \
 			or not is_damageable():
 		return
+	_play_team_sound(_hurt_sound_p1, _hurt_sound_p2)
 	drop_carried_baton()
 	hp = maxi(0, hp - amount)
 	invulnerability = HIT_INVULNERABILITY
 	queue_redraw()
 	health_changed.emit(hp, max_hp)
 	if hp == 0:
+		_play_team_sound(_death_sound_p1, _death_sound_p2)
 		set_movement_locked(true)
 		respawn_timer.start()
 

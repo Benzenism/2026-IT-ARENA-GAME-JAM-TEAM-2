@@ -8,8 +8,6 @@ const PAPER := Color("fbf5f8")
 const INK := Color("160c26")
 const RED := Color("ff2e6e")
 
-const BGM2: AudioStream = preload("res://sounds/bgm2.mp3")
-
 const BG := preload("res://sprites/ui/title/title_bg_paper.png")
 const LOGO := preload("res://sprites/ui/title/title_logo.png")
 const URI_ART := preload("res://sprites/ui/title/uri_idle.png")
@@ -34,19 +32,16 @@ var _uri: Control
 var _hana: Control
 var _logo: Control
 var _menu: Array[SlantButton] = []
-var _music_player: AudioStreamPlayer
+@onready var _music_player: AudioStreamPlayer = $MusicPlayer
+@onready var _click_sound: AudioStreamPlayer = $SfxClick
+@onready var _boom_sound: AudioStreamPlayer = $SfxBoom
 var _leaving := false
 var _time := 0.0
 
 
 func _ready() -> void:
 	get_tree().paused = false
-	_music_player = AudioStreamPlayer.new()
-	_music_player.process_mode = Node.PROCESS_MODE_ALWAYS
-	_music_player.volume_db = -6.0
-	_music_player.stream = BGM2
 	_music_player.finished.connect(_on_music_finished)
-	add_child(_music_player)
 	_music_player.play()
 	_build()
 	resized.connect(_layout)
@@ -259,6 +254,7 @@ func _start_game() -> void:
 	if _leaving:
 		return
 	_leaving = true
+	_boom_sound.play()
 	var curtain := get_node("Curtain") as ColorRect
 	curtain.color = INK
 	curtain.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -269,6 +265,7 @@ func _start_game() -> void:
 
 ## 설명 팝업이 떠 있는 동안 아래 메뉴는 클릭·포커스·키 입력 모두 막음
 func _open_help() -> void:
+	_click_sound.play()
 	for m in _menu:
 		m.set_blocked(true)
 	_help.visible = true
@@ -288,6 +285,7 @@ func _fit_help() -> void:
 
 
 func _close_help() -> void:
+	_click_sound.play()
 	_help.visible = false
 	for m in _menu:
 		m.set_blocked(false)

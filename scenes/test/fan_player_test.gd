@@ -9,7 +9,6 @@ const CAMERA: FanClubData = preload("res://data/fanclubs/camera_fan.tres")
 const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
 const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, VERTICAL, CAMERA, GUARD]
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
-const BGM1: AudioStream = preload("res://sounds/bgm1.mp3")
 const BGM2: AudioStream = preload("res://sounds/bgm2.mp3")
 const MATCH_DURATION := 120.0
 const STAGE_OSCILLATION_AMPLITUDE := 400.0
@@ -40,12 +39,8 @@ func _enter_tree() -> void:
 
 
 func _ready() -> void:
-	music_player = AudioStreamPlayer.new()
-	music_player.process_mode = Node.PROCESS_MODE_ALWAYS
-	music_player.volume_db = -6.0
-	music_player.stream = BGM1
+	music_player = get_tree().current_scene.get_node("MusicPlayer") as AudioStreamPlayer
 	music_player.finished.connect(_on_music_finished)
-	add_child(music_player)
 	music_player.play()
 	var scene_root := get_tree().current_scene
 	var left_viewport := scene_root.get_node("Split/LeftContainer/LeftViewport") as SubViewport
@@ -183,6 +178,7 @@ func _on_capture_confirmed(team_id: int, club: FanClubData) -> void:
 		return
 	idol.set_movement_locked(false)
 	idol.start_carrying(club)
+	idol.play_steal_sound()
 	carrying_sources[idol] = source_team_id
 
 
@@ -209,6 +205,7 @@ func _on_baton_picked_up(baton: CaptureBaton, idol: IdolPlayer) -> void:
 		return
 	_remove_dropped_baton(baton)
 	idol.start_carrying(baton.club)
+	idol.play_steal_sound()
 	carrying_sources[idol] = baton.source_team_id
 	baton.queue_free()
 
@@ -239,6 +236,7 @@ func _complete_capture(idol: IdolPlayer) -> void:
 	source_team.owned_clubs.erase(club)
 	if not target_team.owned_clubs.has(club):
 		target_team.owned_clubs.append(club)
+	idol.play_score_sound()
 	for fan: Fan in get_tree().get_nodes_in_group("fans"):
 		if fan.team_id == source_team_id and fan.club == club:
 			fan.change_team(target_team_id, _player(source_team_id))
@@ -267,6 +265,7 @@ func _finish_game(team_id: int) -> void:
 		return
 	game_over = true
 	winner_team = team_id
+	_player(team_id).play_win_sound()
 	for player in players:
 		player.set_movement_locked(true)
 	for menu: CaptureMenu in get_tree().get_nodes_in_group("capture_menus"):

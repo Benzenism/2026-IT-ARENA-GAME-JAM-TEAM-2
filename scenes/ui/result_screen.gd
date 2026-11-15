@@ -515,13 +515,21 @@ func _animate() -> void:
 
 
 func _on_retry() -> void:
+	_play_click()
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
 func _on_title() -> void:
+	_play_click()
 	get_tree().paused = false
 	get_tree().change_scene_to_file(TITLE_SCENE)
+
+
+func _play_click() -> void:
+	var click_sound := get_tree().current_scene.get_node_or_null("SfxClick") as AudioStreamPlayer
+	if click_sound != null:
+		click_sound.play()
 
 
 ## 승자/패자 패널 경계의 사선 (흰 선 + 글로우)

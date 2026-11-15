@@ -5,6 +5,8 @@
 [ext_resource type="PackedScene" path="res://scenes/ui/hud_overlay.tscn" id="4_hud"]
 [ext_resource type="PackedScene" uid="uid://8x3b7mc64n47" path="res://scenes/ui/capture_menu.tscn" id="5_menu"]
 [ext_resource type="Script" uid="uid://b4ty35x4ebxx3" path="res://scenes/test/fan_player_test.gd" id="6_test"]
+[ext_resource type="AudioStream" path="res://sounds/sfx_click.wav" id="7_click"]
+[ext_resource type="AudioStream" path="res://sounds/bgm1.mp3" id="8_bgm1"]
 
 [sub_resource type="Environment" id="Environment_glow"]
 background_mode = 3
@@ -21,6 +23,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="SfxClick" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+stream = ExtResource("7_click")
+
+[node name="MusicPlayer" type="AudioStreamPlayer" parent="."]
+process_mode = 3
+volume_db = -6.0
+stream = ExtResource("8_bgm1")
 
 [node name="Split" type="HBoxContainer" parent="." unique_id=943272394]
 layout_mode = 1
