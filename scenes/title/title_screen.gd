@@ -14,10 +14,6 @@ const URI_ART := preload("res://sprites/ui/title/uri_idle.png")
 const HANA_ART := preload("res://sprites/ui/title/hana_idle.png")
 const URI_GLOW := preload("res://sprites/ui/title/uri_glow.png")
 const HANA_GLOW := preload("res://sprites/ui/title/hana_glow.png")
-const BTN_START := preload("res://sprites/ui/title/btn_start.png")
-const BTN_START_HOVER := preload("res://sprites/ui/title/btn_start_hover.png")
-const BTN_HELP := preload("res://sprites/ui/title/btn_help.png")
-const BTN_HELP_HOVER := preload("res://sprites/ui/title/btn_help_hover.png")
 
 ## 디자인 배치 (1000×2000 일러스트를 디자인과 같은 크기·위치로)
 const URI_RECT := Rect2(-4.1, 163.0, 621.0, 1242.0)
@@ -25,11 +21,9 @@ const URI_RECT := Rect2(-4.1, 163.0, 621.0, 1242.0)
 const HANA_RECT := Rect2(1343.1, 156.2, 636.7, 1273.4)
 ## 두 줄이 겹치지 않게 다시 합성한 로고 (Figma 레이어별 렌더, 원본과 같은 배율 0.6335)
 const LOGO_RECT := Rect2(352.81, 113.08, 1218.19, 453.57)
-## 버튼: 기본 이미지 위치, 호버 이미지의 기본 대비 오프셋 (호버는 몸통이 (-3,-3) 뜨고 그림자·글로우가 커짐)
+## 메뉴 버튼 위치 (Figma 메뉴 영역 기준)
 const START_POS := Vector2(730, 727)
-const START_HOVER_OFFSET := Vector2(-26.5, -26.5)
 const HELP_POS := Vector2(770, 863)
-const HELP_HOVER_OFFSET := Vector2(-3, -3)
 
 var _canvas: Control
 var _start_button: SlantButton
@@ -98,11 +92,9 @@ func _build() -> void:
 	_logo.pivot_offset = LOGO_RECT.size / 2.0
 	_canvas.add_child(_logo)
 
-	_start_button = _image_button(BTN_START, BTN_START_HOVER, START_POS, START_HOVER_OFFSET,
-		Vector2(469, 104))
+	_start_button = _menu_button("시작하기", Vector2(460, 96), true, 44, "stars", START_POS)
 	_start_button.pressed.connect(_start_game)
-	var help_button := _image_button(BTN_HELP, BTN_HELP_HOVER, HELP_POS, HELP_HOVER_OFFSET,
-		Vector2(385, 78))
+	var help_button := _menu_button("게임 설명", Vector2(380, 74), false, 34, "question", HELP_POS)
 	help_button.pressed.connect(_open_help)
 	_start_button.focus_neighbor_bottom = help_button.get_path()
 	help_button.focus_neighbor_top = _start_button.get_path()
@@ -131,10 +123,10 @@ func _heroine(art: Texture2D, glow: Texture2D, rect: Rect2) -> Control:
 	return holder
 
 
-## Figma에서 뽑은 기본/호버 이미지 버튼. body: 그림자를 뺀 평행사변형 몸통 크기 (호버 판정 영역)
-func _image_button(normal: Texture2D, hover: Texture2D, pos: Vector2, hover_offset: Vector2,
-		body: Vector2) -> SlantButton:
-	var b := SlantButton.from_images(normal, hover, hover_offset, body)
+## 타이틀 메뉴 버튼 (Figma 디자인과 같은 평행사변형 스타일, 글자는 프로젝트 폰트)
+func _menu_button(text_: String, body: Vector2, primary: bool, font_size: int, deco: String,
+		pos: Vector2) -> SlantButton:
+	var b := SlantButton.make(text_, body, primary, font_size, deco)
 	b.position = pos
 	_canvas.add_child(b)
 	_menu.append(b)
@@ -152,13 +144,15 @@ func _make_help() -> Control:
 	layer.add_child(dim)
 
 	# 종이 패널 + 잉크 테두리 + 핑크 하드 섀도
-	var rect := Rect2(340, 255, 1240, 690)
+	var rect := Rect2(400, 300, 1120, 600)
 	var shadow := ColorRect.new()
+	shadow.name = "Shadow"
 	shadow.color = RED
 	shadow.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	HudUi.set_rect(shadow, rect.position + Vector2(14, 14), rect.size)
 	layer.add_child(shadow)
 	var panel := PanelContainer.new()
+	panel.name = "Panel"
 	var box := StyleBoxFlat.new()
 	box.bg_color = PAPER
 	box.border_color = INK
@@ -182,15 +176,13 @@ func _make_help() -> Control:
 	rule.custom_minimum_size = Vector2(120, 6)
 	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(rule)
-	# 진행 → 에너지 방출(Shift) → 승리 조건(전부 차지 / 2분 뒤 다수 / 동점이면 서든데스) 순서
 	var lines := [
-		"상대 무대에 들어가면 팬클럽 응원봉을 하나 빼앗아 올 수 있습니다.",
-		"응원봉을 내 무대까지 가져오면 그 팬클럽이 내 팬이 됩니다.",
-		"팬들의 응원 탄에 맞으면 하트가 줄고, 들고 있던 응원봉을 떨어뜨립니다.",
-		"Shift를 누르면 에너지를 방출해 주변의 상대와 팬을 밀쳐내고,\n응원 탄을 지웁니다. 사용 후에는 잠시 재충전이 필요합니다.",
-		"상대의 팬을 모두 가져오면 그 즉시 승리합니다.",
-		"2분이 지나면 팬을 더 많이 가진 쪽이 승리합니다.",
-		"동점이라면 서든데스가 시작되며, 먼저 팬을 가져오는 쪽이 승리합니다.",
+		"상대 무대의 응원봉을 내 무대로 가져오면 그 팬이 내 편이 됩니다.",
+		"응원 탄에 맞으면 하트가 줄고 응원봉을 떨어뜨립니다.",
+		"Shift로 에너지를 방출해 주변을 밀쳐내고 탄을 지웁니다.",
+		"상대의 팬을 모두 가져오면 승리합니다.",
+		"2분이 지나면 팬이 더 많은 쪽이 승리합니다.",
+		"동점이면 서든데스! 먼저 팬을 가져오는 쪽이 승리합니다.",
 	]
 	for i in range(lines.size()):
 		var row := HBoxContainer.new()
@@ -201,11 +193,10 @@ func _make_help() -> Control:
 		bullet.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		row.add_child(bullet)
 		var l := HudUi.label(lines[i], 32, INK)
-		l.autowrap_mode = TextServer.AUTOWRAP_WORD   # 띄어쓰기에서만 줄바꿈 (단어 중간에서 끊기지 않게)
 		l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		row.add_child(l)
 		col.add_child(row)
-	var keys := HudUi.label("P1  W A S D · 왼쪽 Shift      P2  ← ↑ ↓ → · 오른쪽 Shift", 26, Color(INK, 0.6))
+	var keys := HudUi.label("P1  WASD / 왼쪽 Shift      P2  방향키 / 오른쪽 Shift", 26, Color(INK, 0.6))
 	keys.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	col.add_child(keys)
 	var close_row := HBoxContainer.new()
@@ -266,7 +257,19 @@ func _open_help() -> void:
 	for m in _menu:
 		m.set_blocked(true)
 	_help.visible = true
+	_fit_help()
 	(_help.find_child("Close", true, false) as Control).grab_focus()
+
+
+## 패널 높이를 글자 양(폰트 크기)에 맞추고 화면 가운데에 둠 — 폰트가 바뀌어도 여백이 고르게
+func _fit_help() -> void:
+	var panel := _help.get_node("Panel") as PanelContainer
+	var shadow := _help.get_node("Shadow") as Control
+	# 설명은 한 줄씩이라 줄바꿈 없이 최소 크기 = 실제 글자 크기 (폰트가 바뀌어도 그대로 맞음)
+	var h := panel.get_combined_minimum_size().y
+	var pos := Vector2(panel.position.x, (DESIGN.y - h) / 2.0)
+	HudUi.set_rect(panel, pos, Vector2(panel.size.x, h))
+	HudUi.set_rect(shadow, pos + Vector2(14, 14), Vector2(panel.size.x, h))
 
 
 func _close_help() -> void:

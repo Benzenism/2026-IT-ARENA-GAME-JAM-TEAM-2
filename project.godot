@@ -23,7 +23,7 @@ window/stretch/aspect="expand"
 
 [gui]
 
-theme/custom_font="uid://bupstxq6y2vba"
+theme/custom_font="res://fonts/BMJUA.ttf"
 
 [input]
 
