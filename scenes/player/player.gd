@@ -16,6 +16,7 @@ const PLAYER2_AURA: Texture2D = preload("res://sprites/player2_aura.png")
 const HIT_INVULNERABILITY := 1.0
 const BOUNCE_COOLDOWN := 0.3
 const BOUNCE_INPUT_LOCK := 0.12
+const COLLIDE_SOUND_COOLDOWN := 0.12
 const DIAGONAL_SPEED_MULTIPLIER := 1.2
 const BURST_RADIUS := 300.0
 const BURST_VISUAL_DURATION := 0.2
@@ -48,6 +49,8 @@ var movement_velocity := Vector2.ZERO
 var bounce_velocity := Vector2.ZERO
 var bounce_cooldown := 0.0
 var bounce_input_lock := 0.0
+var collide_sound_cooldown := 0.0
+var _was_colliding := false
 var burst_cooldown_remaining := 0.0
 var burst_cooldown_duration := BURST_COOLDOWN_WITH_PLAYER
 var burst_visual_remaining := 0.0
@@ -69,6 +72,7 @@ var facing_direction := Vector2.RIGHT
 @onready var _score_sound_p2: AudioStreamPlayer = $ScoreSoundP2
 @onready var _win_sound_p1: AudioStreamPlayer = $WinSoundP1
 @onready var _win_sound_p2: AudioStreamPlayer = $WinSoundP2
+@onready var _collide_sound: AudioStreamPlayer = $CollideSound
 
 
 func _ready() -> void:
@@ -91,6 +95,7 @@ func _physics_process(delta: float) -> void:
 	invulnerability = maxf(0.0, invulnerability - delta)
 	bounce_cooldown = maxf(0.0, bounce_cooldown - delta)
 	bounce_input_lock = maxf(0.0, bounce_input_lock - delta)
+	collide_sound_cooldown = maxf(0.0, collide_sound_cooldown - delta)
 	var was_cooling_down := burst_cooldown_remaining > 0.0
 	burst_cooldown_remaining = maxf(0.0, burst_cooldown_remaining - delta)
 	if was_cooling_down and is_zero_approx(burst_cooldown_remaining):
@@ -110,6 +115,7 @@ func _physics_process(delta: float) -> void:
 	if movement_locked:
 		velocity = Vector2.ZERO
 		move_and_slide()
+		_was_colliding = false
 		return
 	# 대각선 이동 속도를 기본 속도의 1.2배까지 허용한다.
 	var direction := Vector2(
@@ -125,6 +131,7 @@ func _physics_process(delta: float) -> void:
 	bounce_velocity = bounce_velocity.move_toward(Vector2.ZERO, maxf(0.0, collision_bounce_deceleration) * delta)
 	velocity = movement_velocity + bounce_velocity
 	move_and_slide()
+	var collided := get_slide_collision_count() > 0
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
 		var other := collision.get_collider() as IdolPlayer
@@ -150,6 +157,9 @@ func _physics_process(delta: float) -> void:
 			_start_bounce(away)
 			other._start_bounce(-away)
 		break
+	if collided and not _was_colliding:
+		_play_collide_sound()
+	_was_colliding = collided
 
 
 func _start_bounce(away: Vector2) -> void:
@@ -309,6 +319,13 @@ func play_win_sound() -> void:
 
 func _play_team_sound(player_one_sound: AudioStreamPlayer, player_two_sound: AudioStreamPlayer) -> void:
 	(player_one_sound if team_id == 1 else player_two_sound).play()
+
+
+func _play_collide_sound() -> void:
+	if collide_sound_cooldown > 0.0:
+		return
+	collide_sound_cooldown = COLLIDE_SOUND_COOLDOWN
+	_collide_sound.play()
 
 
 func finish_carrying() -> FanClubData:

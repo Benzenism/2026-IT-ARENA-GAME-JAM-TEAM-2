@@ -14,6 +14,9 @@ const SQUASH_CHARGE := Vector2(1.08, 0.92)
 const SQUASH_POP := Vector2(0.94, 1.08)
 const SQUASH_POP_TIME := 0.07
 const SQUASH_SETTLE_TIME := 0.28
+const SHOOT_SOUND_RANGE := 650.0
+const SHOOT_SOUND_COOLDOWN := 0.08
+const SHOOT_PITCH_VARIATION := 0.08
 
 @export var club: FanClubData
 @export var team_id: int = 1
@@ -36,9 +39,11 @@ var hit_flash_base_color := Color.WHITE
 var squash_tween: Tween
 var _sprite_base_y := 0.0
 var _sprite_half_height := 0.0
+var _shoot_sound_cooldown := 0.0
 
 @onready var attack_timer: Timer = $AttackTimer
 @onready var sprite: Sprite2D = $Sprite2D
+@onready var _shoot_sound: AudioStreamPlayer = $ShootSound
 var charge_timer: Timer
 
 
@@ -91,6 +96,7 @@ func _process(_delta: float) -> void:
 
 
 func _physics_process(_delta: float) -> void:
+	_shoot_sound_cooldown = maxf(0.0, _shoot_sound_cooldown - _delta)
 	if is_despawning:
 		return
 	knockback_velocity = knockback_velocity.move_toward(Vector2.ZERO, 900.0 * _delta)
@@ -222,8 +228,27 @@ func shoot(direction: Vector2, origin_offset: Vector2 = Vector2.ZERO) -> void:
 	if is_despawning or direction.is_zero_approx() or club.projectile_scene == null:
 		return
 	var aim := direction.normalized()
+	play_shoot_sound()
 	shoot_requested.emit(club.projectile_scene, global_position + aim * 23.0 + origin_offset,
 		aim, team_id, arena_rect, club.projectile_lifetime, club.projectile_speed)
+
+
+func play_shoot_sound() -> void:
+	if _shoot_sound_cooldown > 0.0 or not _has_nearby_idol():
+		return
+	_shoot_sound_cooldown = SHOOT_SOUND_COOLDOWN
+	_shoot_sound.pitch_scale = randf_range(
+		1.0 - SHOOT_PITCH_VARIATION, 1.0 + SHOOT_PITCH_VARIATION)
+	_shoot_sound.play()
+
+
+func _has_nearby_idol() -> bool:
+	var range_squared := SHOOT_SOUND_RANGE * SHOOT_SOUND_RANGE
+	for idol: IdolPlayer in get_tree().get_nodes_in_group("idols"):
+		if is_instance_valid(idol) \
+				and idol.global_position.distance_squared_to(global_position) <= range_squared:
+			return true
+	return false
 
 
 func take_damage(amount: int) -> void:

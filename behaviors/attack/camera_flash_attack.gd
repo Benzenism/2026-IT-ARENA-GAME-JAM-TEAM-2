@@ -13,6 +13,7 @@ var flash_remaining: float = 0.0
 
 
 func fire(fan: Fan) -> void:
+	fan.play_shoot_sound()
 	flash_remaining = FLASH_DURATION
 	fan.queue_redraw()
 	var circle := CircleShape2D.new()
