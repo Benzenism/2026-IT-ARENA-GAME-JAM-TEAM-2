@@ -7,8 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://djcvjnxnmfnad" path="res://sprites/stage/stage1.png" id="4_stage1"]
 [ext_resource type="Texture2D" uid="uid://bx5x8j2drecuk" path="res://sprites/stage/stage2.png" id="5_stage2"]
 [ext_resource type="Texture2D" uid="uid://blxvnklocqwkn" path="res://sprites/player2_sprite.png" id="8_1yooq"]
-[ext_resource type="PackedScene" path="res://scenes/obstacle/speaker.tscn" id="9_speaker"]
-[ext_resource type="PackedScene" path="res://scenes/obstacle/barricade.tscn" id="10_barricade"]
+[ext_resource type="PackedScene" uid="uid://cu3wl7gjh17ql" path="res://scenes/obstacle/speaker.tscn" id="9_speaker"]
+[ext_resource type="PackedScene" uid="uid://bsmnm2ta6ibom" path="res://scenes/obstacle/barricade.tscn" id="10_barricade"]
 
 [node name="World" type="Node2D" unique_id=557916526]
 
@@ -16,23 +16,22 @@
 script = ExtResource("1_field")
 
 [node name="Background" type="Sprite2D" parent="Field" unique_id=1326201674]
-scale = Vector2(2.4, 2.2)
 texture = ExtResource("2_1fp7r")
 
 [node name="Stage1" parent="." unique_id=1852518776 instance=ExtResource("3_stage")]
-position = Vector2(-1500, 0)
+position = Vector2(-1300, 9)
 stage_texture = ExtResource("4_stage1")
 
 [node name="Stage2" parent="." unique_id=1361747067 instance=ExtResource("3_stage")]
-position = Vector2(1500, 0)
+position = Vector2(1300, 0)
 team_id = 2
 stage_texture = ExtResource("5_stage2")
 
 [node name="Player1" parent="." unique_id=2095809743 instance=ExtResource("2_player")]
-position = Vector2(-1600, 0)
+position = Vector2(-1300, 0)
 
 [node name="Player2" parent="." unique_id=1547911868 instance=ExtResource("2_player")]
-position = Vector2(1600, 0)
+position = Vector2(1300, 0)
 input_prefix = "p2"
 player_texture = ExtResource("8_1yooq")
 team_id = 2
@@ -50,19 +49,29 @@ position = Vector2(1750, -360)
 position = Vector2(1750, 360)
 
 [node name="Speaker2" parent="." unique_id=2044483761 instance=ExtResource("9_speaker")]
-position = Vector2(0, 260)
+position = Vector2(-900, 594)
+rotation = -0.2617994
 
 [node name="Speaker3" parent="." unique_id=1822229622 instance=ExtResource("9_speaker")]
-position = Vector2(0, -260)
+position = Vector2(-900, -566)
+rotation = 0.2617994
+
+[node name="Speaker7" parent="." unique_id=1942372737 instance=ExtResource("9_speaker")]
+position = Vector2(900, 594)
+rotation = 0.2617994
+
+[node name="Speaker8" parent="." unique_id=1270513853 instance=ExtResource("9_speaker")]
+position = Vector2(900, -566)
+rotation = -0.2617994
 
 [node name="Barricade1" parent="." unique_id=22965786 instance=ExtResource("10_barricade")]
-position = Vector2(-512, -650)
+position = Vector2(-350, -100)
 
 [node name="Barricade2" parent="." unique_id=100094077 instance=ExtResource("10_barricade")]
-position = Vector2(500, -250)
+position = Vector2(500, -350)
 
 [node name="Barricade3" parent="." unique_id=722580566 instance=ExtResource("10_barricade")]
-position = Vector2(-600, 300)
+position = Vector2(-500, 350)
 
 [node name="Barricade4" parent="." unique_id=1871039163 instance=ExtResource("10_barricade")]
-position = Vector2(521, 631)
+position = Vector2(350, 100)
