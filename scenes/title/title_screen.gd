@@ -11,6 +11,7 @@ const HEROINE_SPREAD := 605.0
 ## 타이틀 글자 묶음의 위쪽 위치 (가로는 화면 가운데 정렬)
 const TITLE_TOP := 100.0
 const GRADIENT_TEXT := preload("res://scenes/ui/hud/gradient_text.gdshader")
+const BGM2: AudioStream = preload("res://sounds/bgm2.mp3")
 
 const BG := preload("res://sprites/ui/title/title_bg.png")
 const GLOW_URI := preload("res://sprites/ui/title/glow_uri.svg")
@@ -33,12 +34,20 @@ var _help: Control
 var _uri: Control
 var _hana: Control
 var _sparkles: Array[Control] = []
+var _music_player: AudioStreamPlayer
 var _leaving := false
 var _time := 0.0
 
 
 func _ready() -> void:
 	get_tree().paused = false
+	_music_player = AudioStreamPlayer.new()
+	_music_player.process_mode = Node.PROCESS_MODE_ALWAYS
+	_music_player.volume_db = -6.0
+	_music_player.stream = BGM2
+	_music_player.finished.connect(_on_music_finished)
+	add_child(_music_player)
+	_music_player.play()
 	_build()
 	resized.connect(_layout)
 	_layout()
@@ -68,6 +77,11 @@ func _process(delta: float) -> void:
 		var k := 0.82 + 0.18 * sin(_time * 2.4 + i * 1.9)
 		sp.scale = Vector2(k, k)
 		sp.rotation = sin(_time * 0.8 + i) * 0.25
+
+
+func _on_music_finished() -> void:
+	if not _leaving and is_instance_valid(_music_player):
+		_music_player.play()
 
 
 func _unhandled_input(event: InputEvent) -> void:
