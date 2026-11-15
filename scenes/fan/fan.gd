@@ -21,6 +21,7 @@ const SQUASH_SETTLE_TIME := 0.28
 @export var ally_player: CharacterBody2D
 var enemy_player: CharacterBody2D
 var arena_rect := Rect2(0, 0, 1280, 720)
+var movement_rect := Rect2()
 var hp: int
 var movement: FanMovement
 var attack: FanAttack
@@ -99,7 +100,13 @@ func _physics_process(_delta: float) -> void:
 	move_and_slide()
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
-		var obstacle := collision.get_collider() as ArenaObstacle
+		var collider := collision.get_collider()
+		if collider.is_in_group("field_walls") \
+				and club.movement_scene.resource_path == "res://behaviors/movement/ForwardMovement.tscn" \
+				and collision.get_normal().x * forward_dir().x < -0.9:
+			exit_map()
+			return
+		var obstacle := collider as ArenaObstacle
 		if obstacle == null:
 			continue
 		var away := collision.get_normal().normalized()

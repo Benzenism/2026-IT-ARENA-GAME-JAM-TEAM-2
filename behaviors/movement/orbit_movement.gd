@@ -27,8 +27,9 @@ func get_direction(fan: Fan) -> Vector2:
 	var radial := Vector2.from_angle(angle)
 	var raw_position := fan.ally_player.global_position + radial * orbit_radius
 	# Keep guards in the arena when the ideal orbit crosses an edge.
-	var margin := Vector2.ONE * 30.0
-	var desired_position := raw_position.clamp(fan.arena_rect.position + margin, fan.arena_rect.end - margin)
+	var movement_bounds := fan.movement_rect if fan.movement_rect.has_area() else fan.arena_rect
+	var margin := Vector2.ONE * maxf(1.0, fan.club.hitbox_radius)
+	var desired_position := raw_position.clamp(movement_bounds.position + margin, movement_bounds.end - margin)
 	var tangent_velocity := radial.orthogonal() * orbit_radius * angular_speed
 	var feed_forward := fan.ally_player.velocity + tangent_velocity
 	if not is_equal_approx(raw_position.x, desired_position.x):

@@ -38,7 +38,8 @@ func get_direction(fan: Fan) -> Vector2:
 
 
 func _choose_target(fan: Fan) -> void:
-	var bounds := fan.arena_rect.grow(-32.0)
+	var movement_bounds := fan.movement_rect if fan.movement_rect.has_area() else fan.arena_rect
+	var bounds := movement_bounds.grow(-maxf(1.0, fan.club.hitbox_radius) - 8.0)
 	var radius := maxf(0.0, move_radius)
 	var neighbors := _other_camera_fans(fan)
 	var zones: Array[CollisionShape2D] = SAFE_ZONE.zones_in_world(fan)

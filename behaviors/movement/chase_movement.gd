@@ -47,7 +47,8 @@ func _separation(fan: Fan) -> Vector2:
 		push += away * (1.0 - distance / separation_radius)
 	push = push.limit_length(1.0)
 	# Separation alone should not push a fan out of the arena at a spawn edge.
-	var safe_bounds := fan.arena_rect.grow(-20.0)
+	var movement_bounds := fan.movement_rect if fan.movement_rect.has_area() else fan.arena_rect
+	var safe_bounds := movement_bounds.grow(-maxf(1.0, fan.club.hitbox_radius))
 	if (fan.global_position.x <= safe_bounds.position.x and push.x < 0.0) \
 			or (fan.global_position.x >= safe_bounds.end.x and push.x > 0.0):
 		push.x = 0.0

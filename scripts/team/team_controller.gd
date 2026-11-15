@@ -25,6 +25,7 @@ var enemy_player: CharacterBody2D
 var fan_container: Node2D
 var projectile_spawner: ProjectileSpawner
 var arena_rect := Rect2(0, 0, 1280, 720)
+var movement_rect := Rect2()
 var spawn_center := Vector2.ZERO
 var spawn_timer: Timer
 var respawn_cooldowns: Dictionary = {}
@@ -107,6 +108,7 @@ func spawn_fan(club: FanClubData) -> Fan:
 	fan.ally_player = ally_player
 	fan.enemy_player = enemy_player
 	fan.arena_rect = arena_rect
+	fan.movement_rect = movement_rect if movement_rect.has_area() else arena_rect
 	# Spread out the first shots so simultaneous spawns do not form an unavoidable wall.
 	fan.first_attack_offset = (spawn_count % 4) * 0.18 + (0.15 if team_id == 2 else 0.0)
 	fan.position = fan_container.to_local(spawn_position)
@@ -123,7 +125,8 @@ func spawn_fan(club: FanClubData) -> Fan:
 
 func _find_spawn_position(club: FanClubData) -> Variant:
 	var body_radius := maxf(1.0, club.hitbox_radius)
-	var bounds := arena_rect.grow(-body_radius - SPAWN_MARGIN)
+	var bounds := (movement_rect if movement_rect.has_area() else arena_rect) \
+			.grow(-body_radius - SPAWN_MARGIN)
 	if bounds.size.x <= 0.0 or bounds.size.y <= 0.0:
 		return null
 	var zones: Array[CollisionShape2D] = SAFE_ZONE.zones_in_world(fan_container)

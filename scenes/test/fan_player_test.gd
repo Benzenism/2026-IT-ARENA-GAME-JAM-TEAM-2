@@ -91,6 +91,7 @@ func _ready() -> void:
 		team.fan_container = fans
 		team.projectile_spawner = projectiles
 		team.arena_rect = bounds
+		team.movement_rect = movement_bounds
 		team.spawn_center = stages[i].global_position
 		add_child(team)
 		teams.append(team)
