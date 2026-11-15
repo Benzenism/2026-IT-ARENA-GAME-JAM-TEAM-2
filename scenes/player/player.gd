@@ -55,6 +55,7 @@ var burst_cooldown_remaining := 0.0
 var burst_cooldown_duration := BURST_COOLDOWN_WITH_PLAYER
 var burst_visual_remaining := 0.0
 var burst_ready_flash_remaining := 0.0
+var _burst_ring_animating := false
 var facing_direction := Vector2.RIGHT
 
 @onready var _sprite: Sprite2D = $Sprite2D
@@ -188,7 +189,10 @@ func _process(_delta: float) -> void:
 		_aura_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0 - progress)
 	else:
 		_aura_sprite.visible = false
-	queue_redraw()
+	var ring_animating := burst_cooldown_remaining > 0.0 or burst_ready_flash_remaining > 0.0
+	if ring_animating or _burst_ring_animating:
+		queue_redraw()
+	_burst_ring_animating = ring_animating
 
 
 func _unhandled_input(event: InputEvent) -> void:

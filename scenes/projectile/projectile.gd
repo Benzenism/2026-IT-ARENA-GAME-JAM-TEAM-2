@@ -16,11 +16,16 @@ var consumed: bool = false
 var age: float = 0.0
 var spawn_sequence: int = 0
 var _wave_offset: float = 0.0
+var _safe_zone_query: PhysicsShapeQueryParameters2D
 
 
 func _ready() -> void:
 	add_to_group("projectiles")
 	direction = direction.normalized()
+	_safe_zone_query = PhysicsShapeQueryParameters2D.new()
+	_safe_zone_query.shape = ($CollisionShape2D as CollisionShape2D).shape
+	_safe_zone_query.collision_mask = 4
+	_safe_zone_query.collide_with_bodies = true
 	body_entered.connect(_on_body_entered)
 
 
@@ -46,12 +51,8 @@ func _physics_process(delta: float) -> void:
 
 func _inside_stage_safe_zone() -> bool:
 	var collision := $CollisionShape2D as CollisionShape2D
-	var query := PhysicsShapeQueryParameters2D.new()
-	query.shape = collision.shape
-	query.transform = collision.global_transform
-	query.collision_mask = 4
-	query.collide_with_bodies = true
-	for result in get_world_2d().direct_space_state.intersect_shape(query, 8):
+	_safe_zone_query.transform = collision.global_transform
+	for result in get_world_2d().direct_space_state.intersect_shape(_safe_zone_query, 8):
 		if result.collider.is_in_group("stage_safe_zones"):
 			return true
 	return false

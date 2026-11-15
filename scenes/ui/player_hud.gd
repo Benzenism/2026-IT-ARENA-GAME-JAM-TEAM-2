@@ -73,6 +73,9 @@ const FANS_CAPTION_LIFT := 4
 
 var sudden_death := false
 var _clubs: Array[FanClubData] = []
+var _club_textures: Array[Texture2D] = []
+var _last_population := -1
+var _last_population_limit := -1
 
 var _panel: Control
 var _portrait: TextureRect
@@ -105,11 +108,27 @@ func set_match_state(_time_left: float, is_sudden_death: bool, game_over: bool,
 
 func set_player_state(hp: int, _max_hp: int, clubs: Array[FanClubData],
 		population: int, population_limit: int) -> void:
-	_update_portrait(hp)
-	_clubs = clubs
-	_refresh_chips()
-	_fan_count.text = str(population)
-	_fan_total.text = " / %d" % population_limit
+	if hp != _last_hp:
+		_update_portrait(hp)
+	var clubs_changed := _clubs != clubs or _club_textures.size() != clubs.size()
+	if not clubs_changed:
+		for i in clubs.size():
+			var texture: Texture2D = clubs[i].sprite_texture if clubs[i] != null else null
+			if _club_textures[i] != texture:
+				clubs_changed = true
+				break
+	if clubs_changed:
+		_clubs = clubs.duplicate()
+		_club_textures.clear()
+		for club in clubs:
+			_club_textures.append(club.sprite_texture if club != null else null)
+		_refresh_chips()
+	if population != _last_population:
+		_last_population = population
+		_fan_count.text = str(population)
+	if population_limit != _last_population_limit:
+		_last_population_limit = population_limit
+		_fan_total.text = " / %d" % population_limit
 
 
 # --- 레이아웃 ----------------------------------------------------------------
@@ -148,6 +167,9 @@ func _tex(key: String) -> Texture2D:
 func _build() -> void:
 	for child in get_children():
 		child.free()
+	_last_hp = -1
+	_last_population = -1
+	_last_population_limit = -1
 	var p2 := _is_p2()
 	# 화면 절반 영역
 	anchor_left = 0.5 if p2 else 0.0
