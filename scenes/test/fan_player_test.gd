@@ -48,6 +48,9 @@ func _ready() -> void:
 		world.get_node("Player2") as IdolPlayer
 	]
 	var bounds := field.get_field_rect()
+	var movement_bounds := field.get_movement_rect()
+	for obstacle: ArenaObstacle in get_tree().get_nodes_in_group("arena_obstacles"):
+		obstacle.set_arena_rect(movement_bounds)
 	stages = [
 		world.get_node("Stage1") as IdolStage,
 		world.get_node("Stage2") as IdolStage
