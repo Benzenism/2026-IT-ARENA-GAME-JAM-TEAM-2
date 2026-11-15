@@ -13,6 +13,7 @@ config_version=5
 config/name="마법소녀는 사랑받고 싶어"
 run/main_scene="res://scenes/title/title_screen.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/image="uid://bbqpqpesayrho"
 config/icon="uid://bbqpqpesayrho"
 
 [display]
