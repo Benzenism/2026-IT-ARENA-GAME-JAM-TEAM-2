@@ -30,6 +30,11 @@ func get_field_rect() -> Rect2:
 	return Rect2(global_position - size / 2.0, size)
 
 
+## 필드 벽의 안쪽 영역. 캐릭터 이동 경계와 장애물 경계에 사용.
+func get_movement_rect() -> Rect2:
+	return get_field_rect().grow(-maxf(0.0, movement_margin))
+
+
 func _draw() -> void:
 	var rect := Rect2(-size / 2.0, size)
 	draw_rect(rect, background_color)

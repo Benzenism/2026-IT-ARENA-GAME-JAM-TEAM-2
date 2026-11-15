@@ -11,6 +11,8 @@ extends CharacterBody2D
 @export var team_id: int = 1
 @export var max_hp: int = 3
 
+const PLAYER1_AURA: Texture2D = preload("res://sprites/player1_aura.png")
+const PLAYER2_AURA: Texture2D = preload("res://sprites/player2_aura.png")
 const HIT_INVULNERABILITY := 1.0
 const BOUNCE_COOLDOWN := 0.3
 const BOUNCE_INPUT_LOCK := 0.12
@@ -52,12 +54,14 @@ var facing_direction := Vector2.RIGHT
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _baton_sprite: Sprite2D = $BatonSprite
+@onready var _aura_sprite: Sprite2D = $AuraSprite
 
 
 func _ready() -> void:
 	add_to_group("idols")
 	assert(player_texture != null, "Assign a player texture before adding an IdolPlayer.")
 	_sprite.texture = player_texture
+	_aura_sprite.texture = PLAYER1_AURA if team_id == 1 else PLAYER2_AURA
 	hp = max_hp
 	facing_direction = Vector2.RIGHT if team_id == 1 else Vector2.LEFT
 	_sprite.flip_h = team_id == 1
@@ -110,6 +114,14 @@ func _physics_process(delta: float) -> void:
 	for i in get_slide_collision_count():
 		var collision := get_slide_collision(i)
 		var other := collision.get_collider() as IdolPlayer
+		var obstacle := collision.get_collider() as ArenaObstacle
+		if obstacle != null:
+			var away := collision.get_normal().normalized()
+			if away.is_zero_approx():
+				away = obstacle.global_position.direction_to(global_position)
+			_start_bounce(away)
+			obstacle.apply_push(-away, collision_bounce_speed)
+			break
 		if other == null or not other.is_combat_active():
 			continue
 		if other.team_id != team_id:
@@ -141,8 +153,17 @@ func _start_bounce(away: Vector2) -> void:
 func _process(_delta: float) -> void:
 	if not is_combat_active():
 		_sprite.visible = false
+		_aura_sprite.visible = false
 		return
 	_sprite.visible = invulnerability <= 0.0 or fmod(invulnerability * 10.0, 2.0) > 1.0
+	if burst_visual_remaining > 0.0:
+		var progress := 1.0 - burst_visual_remaining / BURST_VISUAL_DURATION
+		var aura_scale := 0.75 + progress * 0.25
+		_aura_sprite.visible = true
+		_aura_sprite.scale = Vector2.ONE * aura_scale
+		_aura_sprite.modulate = Color(1.0, 1.0, 1.0, 1.0 - progress)
+	else:
+		_aura_sprite.visible = false
 	queue_redraw()
 
 
@@ -159,12 +180,6 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _draw() -> void:
 	_draw_burst_ring()
-	if burst_visual_remaining > 0.0:
-		var progress := 1.0 - burst_visual_remaining / BURST_VISUAL_DURATION
-		var burst_color := Color(0.45, 0.75, 1.0, 0.8) if team_id == 1 \
-				else Color(1.0, 0.45, 0.75, 0.8)
-		draw_arc(Vector2.ZERO, BURST_RADIUS * (0.75 + progress * 0.25),
-			0.0, TAU, 64, Color(burst_color, burst_color.a * (1.0 - progress)), 5.0, true)
 	for i in range(max_hp):
 		var offset := Vector2((i - (max_hp - 1) * 0.5) * 21.0, 83.0)
 		var points := PackedVector2Array()

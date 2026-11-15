@@ -4,5 +4,3 @@
 
 [node name="ForwardAttack" type="Node"]
 script = ExtResource("1")
-burst_count = 3
-burst_interval = 0.12

@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://cu3wl7gjh17ql"]
+
+[ext_resource type="Script" uid="uid://k3c1p7n4t17o" path="res://scenes/obstacle/obstacle.gd" id="1_script"]
+[ext_resource type="Texture2D" uid="uid://c7bn3wsr5ngdp" path="res://sprites/speaker.png" id="2_texture"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_speaker"]
+size = Vector2(90, 225)
+
+[node name="Speaker" type="CharacterBody2D" unique_id=1942372737]
+z_index = 5
+collision_mask = 0
+script = ExtResource("1_script")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=2044767081]
+texture = ExtResource("2_texture")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=264602599]
+shape = SubResource("RectangleShape2D_speaker")

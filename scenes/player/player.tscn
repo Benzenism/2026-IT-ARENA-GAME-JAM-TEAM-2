@@ -16,6 +16,10 @@ player_texture = ExtResource("2_dovo2")
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=2004680724]
 texture = ExtResource("2_dovo2")
 
+[node name="AuraSprite" type="Sprite2D" parent="." unique_id=2004680725]
+z_index = -1
+visible = false
+
 [node name="BatonSprite" type="Sprite2D" parent="." unique_id=648356014]
 visible = false
 position = Vector2(0, -56)

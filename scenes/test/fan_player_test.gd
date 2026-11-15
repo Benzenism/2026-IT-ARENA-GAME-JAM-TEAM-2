@@ -10,10 +10,15 @@ const GUARD: FanClubData = preload("res://data/fanclubs/guard_fan.tres")
 const ALL_CLUBS: Array[FanClubData] = [NORMAL, ANTI, DIAGONAL, VERTICAL, CAMERA, GUARD]
 const BATON_SCENE: PackedScene = preload("res://scenes/gameplay/baton.tscn")
 const MATCH_DURATION := 120.0
+const STAGE_OSCILLATION_AMPLITUDE := 400.0
+const STAGE_OSCILLATION_PERIOD := 30.0
+const STAGE_HORIZONTAL_AMPLITUDE := 100.0
+const STAGE_ROTATION_PERIOD := 30.0
 
 var teams: Array[TeamController] = []
 var players: Array[IdolPlayer] = []
 var stages: Array[IdolStage] = []
+var stage_base_positions: Array[Vector2] = []
 var fans: Node2D
 var projectiles: ProjectileSpawner
 var match_time_left := MATCH_DURATION
@@ -23,6 +28,7 @@ var winner_team := 0
 var carrying_sources: Dictionary = {}
 var dropped_batons: Array[CaptureBaton] = []
 var ui_connected := false
+var stage_oscillation_time := 0.0
 
 
 func _enter_tree() -> void:
@@ -42,10 +48,15 @@ func _ready() -> void:
 		world.get_node("Player2") as IdolPlayer
 	]
 	var bounds := field.get_field_rect()
+	var movement_bounds := field.get_movement_rect()
+	for obstacle: ArenaObstacle in get_tree().get_nodes_in_group("arena_obstacles"):
+		obstacle.set_arena_rect(movement_bounds)
 	stages = [
 		world.get_node("Stage1") as IdolStage,
 		world.get_node("Stage2") as IdolStage
 	]
+	for stage in stages:
+		stage_base_positions.append(stage.position)
 	for stage in stages:
 		stage.idol_entered.connect(_on_stage_idol_entered)
 	for player in players:
@@ -78,6 +89,25 @@ func _ready() -> void:
 				break
 	add_to_group("game_controller")
 	call_deferred("_connect_ui")
+
+
+func _physics_process(delta: float) -> void:
+	if stages.is_empty():
+		return
+	stage_oscillation_time = fmod(stage_oscillation_time + delta, STAGE_OSCILLATION_PERIOD)
+	var progress := stage_oscillation_time / STAGE_OSCILLATION_PERIOD
+	var vertical_offset := sin(progress * TAU) * STAGE_OSCILLATION_AMPLITUDE
+	for index in range(stages.size()):
+		var horizontal_direction := 1.0 if index == 0 else -1.0
+		var horizontal_offset := horizontal_direction * absf(cos(progress * TAU)) \
+				* STAGE_HORIZONTAL_AMPLITUDE
+		stages[index].position = stage_base_positions[index] \
+				+ Vector2(horizontal_offset, vertical_offset)
+		stages[index].sprite.rotation = stage_oscillation_time \
+				/ STAGE_ROTATION_PERIOD * TAU
+		players[index].set_own_stage(stages[index].global_position, 220.0)
+		if index < teams.size():
+			teams[index].spawn_center = stages[index].global_position
 
 
 func _randomize_team_clubs() -> Array:
