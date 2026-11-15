@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d1g8jyc1nbf3g"
-path="res://.godot/imported/glow_hana.svg-05d0a235ce460f5283d4ea0ea8bc1dd7.ctex"
+uid="uid://dei3o6ymywaw3"
+path="res://.godot/imported/title_bg_paper.png-30b5402ffa1323e060e9b51debcc19cf.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://sprites/ui/title/glow_hana.svg"
-dest_files=["res://.godot/imported/glow_hana.svg-05d0a235ce460f5283d4ea0ea8bc1dd7.ctex"]
+source_file="res://sprites/ui/title/title_bg_paper.png"
+dest_files=["res://.godot/imported/title_bg_paper.png-30b5402ffa1323e060e9b51debcc19cf.ctex"]
 
 [params]
 
@@ -38,6 +38,3 @@ process/hdr_as_srgb=false
 process/hdr_clamp_exposure=false
 process/size_limit=0
 detect_3d/compress_to=1
-svg/scale=2.0
-editor/scale_with_editor_scale=false
-editor/convert_colors_with_editor_theme=false

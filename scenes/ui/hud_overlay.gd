@@ -11,6 +11,8 @@ const GLOW_BOTTOM := 130.0 # 구분선 글로우는 시계 탭 리본 위(디자
 
 # Godot의 SVG 렌더러(ThorVG)는 필터(그림자/글로우)가 걸린 그룹에서 그림자만 그리고
 # 도형은 빠뜨린다. 그래서 원본 SVG = 글로우 레이어, *_shape.svg(필터 제거) = 도형 레이어로 겹쳐 쓴다.
+## 시계 탭 안 숫자/서든데스 글자의 위쪽 위치 (Jua 폰트 기준으로 탭 가운데에 보이도록)
+const CLOCK_TEXT_Y := 128.0
 const CLOCK_BASE := preload("res://sprites/ui/hud/clock_base.svg")
 const CLOCK_BASE_SHAPE := preload("res://sprites/ui/hud/clock_base_shape.svg")
 const CLOCK_TEX := {
@@ -194,7 +196,7 @@ func _make_clock() -> Control:
 	_time_label.name = "MatchTimer"
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	HudUi.set_rect(_time_label, Vector2(760, 122), Vector2(400, 74))
+	HudUi.set_rect(_time_label, Vector2(760, CLOCK_TEXT_Y), Vector2(400, 74))
 	if not Engine.is_editor_hint():
 		_time_label.add_to_group("match_timer")
 	clock.add_child(_time_label)
@@ -206,7 +208,7 @@ func _make_clock() -> Control:
 	_sudden_label = HudUi.label("서든데스", 44, Color.WHITE, Color("ff3b5c"), Vector2(0, 3))
 	_sudden_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_sudden_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	HudUi.set_rect(_sudden_label, Vector2(760, 122), Vector2(400, 74))
+	HudUi.set_rect(_sudden_label, Vector2(760, CLOCK_TEXT_Y), Vector2(400, 74))
 	clock.add_child(_sudden_label)
 	_sudden_ribbon = _ribbon("SUDDEN DEATH", Color("ff3b5c"), Color.WHITE)
 	clock.add_child(_sudden_ribbon)

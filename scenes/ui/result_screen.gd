@@ -60,7 +60,7 @@ var _game_set: Control
 var _win_title: Control
 var _lose_title: Control
 var _bar: Control
-var _retry: PillButton
+var _retry: SlantButton
 var _rays: TextureRect
 var _flare: TextureRect
 var _confetti: Array = []   # [node, speed, spin, sway phase]
@@ -399,9 +399,9 @@ func _make_result_bar(p1_clubs: int, p2_clubs: int) -> Control:
 	sbox.bg_color = Color(0.102, 0.059, 0.18, 0.92)
 	sbox.border_color = Color.WHITE
 	sbox.set_border_width_all(3)
-	sbox.set_corner_radius_all(999)
-	sbox.content_margin_left = 28
-	sbox.content_margin_right = 28
+	sbox.skew = Vector2(SlantButton.SLANT, 0)
+	sbox.content_margin_left = 40
+	sbox.content_margin_right = 40
 	sbox.content_margin_top = 6
 	sbox.content_margin_bottom = 6
 	sbox.shadow_color = Color(0, 0, 0, 0.7)
@@ -418,15 +418,12 @@ func _make_result_bar(p1_clubs: int, p2_clubs: int) -> Control:
 	score.add_child(srow)
 	score.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 
-	_retry = PillButton.make("다시하기", Vector2(189, 74), true, 32)
-	_retry.normal_style = _retry.normal_style.duplicate()
-	_retry.normal_style["border_width"] = 3.0
-	_retry.normal_style["glow"] = Color(0, 0, 0, 0)
-	_retry.normal_style["drop"] = Color(0, 0, 0, 0.7)
-	_retry.normal_style["drop_offset"] = 6.0
-	_retry._refresh()
+	# 타이틀 메뉴와 같은 평행사변형 버튼 (주: 잉크+빨강 그림자 / 보조: 종이+잉크 선)
+	_retry = SlantButton.make("다시하기", Vector2(250, 72), true, 32, "stars")
+	_retry.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	_retry.pressed.connect(_on_retry)
-	var to_title := PillButton.make("타이틀로", Vector2(190, 74), false, 32)
+	var to_title := SlantButton.make("타이틀로", Vector2(240, 72), false, 32)
+	to_title.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	to_title.pressed.connect(_on_title)
 
 	# HANA 승리 화면은 디자인처럼 [다시하기][타이틀로][점수] 순서
