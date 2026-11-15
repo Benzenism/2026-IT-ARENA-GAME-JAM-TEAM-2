@@ -1,7 +1,7 @@
 extends FanAttack
 ## Lock the target position when the warning starts; shots never home.
 
-@export_range(0.0, 10.0, 0.5) var spread_degrees: float = 2.0
+@export_range(0.0, 10.0, 0.5) var spread_degrees: float = 4.0
 
 
 func prepare(fan: Fan) -> void:

@@ -192,11 +192,11 @@ func _on_charge_finished() -> void:
 	attack_timer.start(maxf(0.05, club.attack_interval - charge_timer.wait_time))
 
 
-func shoot(direction: Vector2) -> void:
+func shoot(direction: Vector2, origin_offset: Vector2 = Vector2.ZERO) -> void:
 	if is_despawning or direction.is_zero_approx() or club.projectile_scene == null:
 		return
 	var aim := direction.normalized()
-	shoot_requested.emit(club.projectile_scene, global_position + aim * 23.0,
+	shoot_requested.emit(club.projectile_scene, global_position + aim * 23.0 + origin_offset,
 		aim, team_id, arena_rect, club.projectile_lifetime, club.projectile_speed)
 
 
