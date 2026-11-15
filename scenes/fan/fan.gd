@@ -9,7 +9,7 @@ signal shoot_requested(scene: PackedScene, origin: Vector2, direction: Vector2,
 const HEART_POINTS := [Vector2(0, 8), Vector2(-8, 1), Vector2(-9, -3),
 	Vector2(-7, -7), Vector2(-3, -8), Vector2(0, -5), Vector2(3, -8),
 	Vector2(7, -7), Vector2(9, -3), Vector2(8, 1), Vector2(0, 8)]
-# 공격 준비(주황색) 동안 납작하게 웅크렸다가, 발사하는 순간 위로 쭉 늘어난 뒤 말랑하게 돌아옴
+# 공격 준비 동안 납작하게 웅크렸다가, 발사하는 순간 위로 쭉 늘어난 뒤 말랑하게 돌아옴
 const SQUASH_CHARGE := Vector2(1.08, 0.92)
 const SQUASH_POP := Vector2(0.94, 1.08)
 const SQUASH_POP_TIME := 0.07
@@ -85,8 +85,7 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if is_charging and (hit_flash_tween == null or not hit_flash_tween.is_running()):
 		var progress := 1.0 - (charge_timer.time_left / charge_timer.wait_time)
-		# A warm flash remains visible even when the original sprite is white.
-		var warning_color := Color(1.0, 0.68, 0.3, charge_base_color.a)
+		var warning_color := Color(get_warning_color(), charge_base_color.a)
 		sprite.modulate = charge_base_color.lerp(warning_color, 0.35 + 0.4 * progress)
 
 
@@ -116,7 +115,7 @@ func _physics_process(_delta: float) -> void:
 func _draw() -> void:
 	if is_charging:
 		if show_trajectory_guides:
-			var line_color := Color(1.0, 0.55, 0.55, 0.7) if team_id == 1 else Color(0.55, 0.7, 1.0, 0.7)
+			var line_color := Color(get_warning_color(), 0.7)
 			for direction in attack.prepared_directions:
 				var aim := direction.normalized()
 				if aim.is_zero_approx():
@@ -129,7 +128,7 @@ func _draw() -> void:
 	attack.draw_effect(self)
 	if is_despawning:
 		return
-	var health_color := Color("0c56f6") if team_id == 1 else Color("e845e0")
+	var health_color := get_team_color()
 	for i in range(club.max_hp):
 		var offset := Vector2((i - (club.max_hp - 1) * 0.5) * 21.0, 68.0)
 		var points := PackedVector2Array()
@@ -155,6 +154,14 @@ func _telegraph_length(origin: Vector2, direction: Vector2) -> float:
 
 func forward_dir() -> Vector2:
 	return Vector2.RIGHT if team_id == 1 else Vector2.LEFT
+
+
+func get_team_color() -> Color:
+	return Color("0c56f6") if team_id == 1 else Color("e845e0")
+
+
+func get_warning_color() -> Color:
+	return get_team_color().lightened(0.30)
 
 
 func apply_knockback(direction: Vector2, distance: float) -> void:
