@@ -1,5 +1,5 @@
 extends Control
-## Figma "Title Screen" (Mii - UI, 63:951) — 게임 시작 화면. 시작하기 → 인게임, 게임 설명 → 규칙 패널.
+## 시작하기 → 만화 → 게임 설명 → 인게임. 메뉴에서 게임 설명을 따로 볼 수도 있다.
 ## 디자인 좌표(1920×1200)로 만든 Canvas를 화면 폭에 맞춰 스케일하고 세로 가운데 정렬.
 
 const GAME_SCENE := "res://scenes/test/fan_player_test.tscn"
@@ -14,6 +14,9 @@ const URI_ART := preload("res://sprites/ui/title/uri_idle.png")
 const HANA_ART := preload("res://sprites/ui/title/hana_idle.png")
 const URI_GLOW := preload("res://sprites/ui/title/uri_glow.png")
 const HANA_GLOW := preload("res://sprites/ui/title/hana_glow.png")
+const INTRO_COMIC := preload("res://scenes/title/intro_comic.gd")
+
+@export var intro_comic_images: Array[Texture2D] = []
 
 ## 디자인 배치 (1000×2000 일러스트를 디자인과 같은 크기·위치로)
 const URI_RECT := Rect2(-4.1, 163.0, 621.0, 1242.0)
@@ -28,6 +31,8 @@ const HELP_POS := Vector2(770, 863)
 var _canvas: Control
 var _start_button: SlantButton
 var _help: Control
+var _comic: Control
+var _start_after_help := false
 var _uri: Control
 var _hana: Control
 var _logo: Control
@@ -111,6 +116,11 @@ func _build() -> void:
 
 	_help = _make_help()
 	_canvas.add_child(_help)
+	_comic = INTRO_COMIC.new()
+	_comic.panel_images = intro_comic_images
+	_comic.visible = false
+	_canvas.add_child(_comic)
+	_comic.completed.connect(_on_comic_completed)
 
 	var curtain := ColorRect.new()
 	curtain.name = "Curtain"
@@ -187,8 +197,8 @@ func _make_help() -> Control:
 	rule.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	col.add_child(rule)
 	var lines := [
-		"상대 무대의 응원봉을 내 무대로 가져오면 그 팬이 내 편이 됩니다.",
-		"응원 탄에 맞으면 하트가 줄고 응원봉을 떨어뜨립니다.",
+		"상대 무대의 팬클럽을 내 무대로 가져오면 그 팬이 내 편이 됩니다.",
+		"응원 탄에 맞으면 하트가 줄고 팬클럽을 떨어뜨립니다.",
 		"Shift로 에너지를 방출해 주변을 밀쳐내고 탄을 지웁니다.",
 		"상대의 팬을 모두 가져오면 승리합니다.",
 		"2분이 지나면 팬이 더 많은 쪽이 승리합니다.",
@@ -255,6 +265,17 @@ func _start_game() -> void:
 		return
 	_leaving = true
 	_boom_sound.play()
+	for m in _menu:
+		m.set_blocked(true)
+	_comic.start()
+
+
+func _on_comic_completed() -> void:
+	_start_after_help = true
+	_open_help()
+
+
+func _launch_game() -> void:
 	var curtain := get_node("Curtain") as ColorRect
 	curtain.color = INK
 	curtain.mouse_filter = Control.MOUSE_FILTER_STOP
@@ -269,8 +290,11 @@ func _open_help() -> void:
 	for m in _menu:
 		m.set_blocked(true)
 	_help.visible = true
+	var close := _help.find_child("Close", true, false) as SlantButton
+	close.label_text = "게임 시작" if _start_after_help else "닫기"
+	close.queue_redraw()
 	_fit_help()
-	(_help.find_child("Close", true, false) as Control).grab_focus()
+	close.grab_focus()
 
 
 ## 패널 높이를 글자 양(폰트 크기)에 맞추고 화면 가운데에 둠 — 폰트가 바뀌어도 여백이 고르게
@@ -287,6 +311,10 @@ func _fit_help() -> void:
 func _close_help() -> void:
 	_click_sound.play()
 	_help.visible = false
+	if _start_after_help:
+		_start_after_help = false
+		_launch_game()
+		return
 	for m in _menu:
 		m.set_blocked(false)
 	_start_button.grab_focus()
