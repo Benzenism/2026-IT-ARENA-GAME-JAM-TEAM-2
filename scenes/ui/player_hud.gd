@@ -50,6 +50,9 @@ const SPARKLE_8 := preload("res://sprites/ui/hud/sparkle_8.svg")
 		team_id = value
 		if is_inside_tree():
 			_build()
+## P1/P2 태그를 이름 줄 상자 중심보다 내리는 양 (Jua 폰트의 이름 글자 '보이는' 중심에 맞춤)
+const TAG_DROP := 4.0
+
 ## 비워두면 P1 = Uri, P2 = Hana
 @export var player_name: String = "":
 	set(value):
@@ -196,14 +199,19 @@ func _build() -> void:
 	HudUi.set_rect(nameplate, Vector2(_mx(12, 320), 184), Vector2(320, 40))
 	var tag := HudUi.pill("P2" if p2 else "P1", 14, Color.WHITE, _accent(), Color.WHITE, 2,
 		Vector2(8, 0))
-	tag.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	# 이름은 대부분 소문자라 글자의 '보이는' 중심이 줄 상자 중심보다 아래 → 태그를 그만큼 내림
+	var tag_box := MarginContainer.new()
+	tag_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	tag_box.add_theme_constant_override("margin_top", int(TAG_DROP * 2.0))
+	tag_box.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	tag_box.add_child(tag)
 	_name_label = HudUi.label(_display_name(), 32, Color.WHITE, _shade())
 	_name_label.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	if p2:
 		nameplate.add_child(_name_label)
-		nameplate.add_child(tag)
+		nameplate.add_child(tag_box)
 	else:
-		nameplate.add_child(tag)
+		nameplate.add_child(tag_box)
 		nameplate.add_child(_name_label)
 	_panel.add_child(nameplate)
 
