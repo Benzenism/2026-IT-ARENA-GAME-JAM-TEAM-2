@@ -20,7 +20,7 @@ scale = Vector2(0.2, 0.2)
 
 [node name="ProjectileVisual" type="Node2D" parent="."]
 material = SubResource("ShotGlow")
-scale = Vector2(3, 3)
+scale = Vector2(1.5, 1.5)
 script = ExtResource("2_visual")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=428598497]
