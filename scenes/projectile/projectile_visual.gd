@@ -3,8 +3,8 @@ extends Node2D
 
 const PINK := Color("e845e0")
 const BLUE := Color("0c56f6")
-const TAIL_LENGTH := 34.0
-const WAVE_TAIL_LENGTH := 48.0
+const TAIL_LENGTH := 44.0
+const WAVE_TAIL_LENGTH := 56.0
 const WAVE_TAIL_SEGMENTS := 12
 
 var color := Color.WHITE
@@ -30,8 +30,8 @@ func _draw() -> void:
 	if _shot.wave_amplitude > 0.0:
 		_draw_wave_tail(light)
 	else:
-		var outer_tail := PackedVector2Array([Vector2(-TAIL_LENGTH, 0), Vector2(-4, -5),
-			Vector2(4, 0), Vector2(-4, 5)])
+		var outer_tail := PackedVector2Array([Vector2(-TAIL_LENGTH, 0), Vector2(-10, -5),
+			Vector2(4, 0), Vector2(-10, 5)])
 		draw_colored_polygon(outer_tail, Color(color, 0.28))
 		var inner_tail := PackedVector2Array([Vector2(-TAIL_LENGTH * 0.7, 0), Vector2(-3, -2.4),
 			Vector2(3, 0), Vector2(-3, 2.4)])
@@ -39,11 +39,13 @@ func _draw() -> void:
 		for side in [-1.0, 1.0]:
 			draw_line(Vector2(-24, side * 5), Vector2(-10, side * 3),
 				Color(light, 0.35), 1.2, true)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * 2.0)
 	var body := PackedVector2Array([Vector2(7, 0), Vector2(2, -4.5), Vector2(-4, -4),
 		Vector2(-6, 0), Vector2(-4, 4), Vector2(2, 4.5), Vector2(7, 0)])
 	draw_colored_polygon(body, color)
 	draw_polyline(body, Color("20132b"), 1.4, true)
 	draw_circle(Vector2(1, 0), 2.7, Color(1.0, 1.0, 1.0, 0.95))
+	draw_set_transform(Vector2.ZERO)
 	if _shot.wave_amplitude <= 0.0:
 		var sparkle := Vector2(-TAIL_LENGTH * 0.65, 0)
 		draw_line(sparkle + Vector2(0, -3), sparkle + Vector2(0, 3), Color(light, 0.65), 1.0, true)
